@@ -1,5 +1,0 @@
-===== SM3 Ref vs Opt =====
-L1 PASS
-L2 PASS
-L3 PASS
-L4 PASS

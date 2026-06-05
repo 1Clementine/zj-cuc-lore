@@ -1,5 +1,8 @@
-===== SHAKE Ref vs Opt =====
-L1 PASS
-L2 PASS
-L3 PASS
-L4 PASS
+===== SHAKE L1 Ref vs Opt =====
+L1 PASS: SHAKE KAT retained
+===== SHAKE L2 Ref vs Opt =====
+L2 PASS: SHAKE KAT retained
+===== SHAKE L3 Ref vs Opt =====
+L3 PASS: SHAKE KAT retained
+===== SHAKE L4 Ref vs Opt =====
+L4 PASS: SHAKE KAT retained
