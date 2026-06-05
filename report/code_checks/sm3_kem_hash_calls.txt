@@ -1,0 +1,48 @@
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L2/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L4/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L1/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L4/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Reference_Implementation/Lore-L3/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L3/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L2/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:10:#include "sm3.h"
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:23:    sm3(out, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:37:    sm3_kdf(out, 2 * LORE_SYMBYTES, in, inlen);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:130:    sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:207:        sm3_kdf(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+zj-cuc-lore-sm3/Implementations/Optimized_Implementation/Lore-L1/kem.c:221:    sm3_kdf(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);

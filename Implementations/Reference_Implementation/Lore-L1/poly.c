@@ -457,12 +457,15 @@ void unpack_t_bits(uint8_t *t_indices, const unsigned char *r) {
 * Returns:     the index of the closest value in R
 **************************************************/
 int16_t find_closest_r_idx(int16_t x_t) {
-    (void)x_t; // Suppress unused variable warning for T=2.
     #if LORE_T == 4
-        // Extract lower 2 bits. Returns 1 if value is 2.
-        return (x_t & 3) == 2;
+        // Rounding to S_R={0,2} under modular distance.
+        // Tie is broken by choosing the smaller representative.
+        // This function returns the index in S_R:
+        // x_t=0,1,3 -> index 0 -> S_R value 0
+        // x_t=2     -> index 1 -> S_R value 2
+        return ((x_t & 3) == 2);
     #else
-        // Always returns 0 for T=2.
+        (void)x_t;
         return 0;
     #endif
 }

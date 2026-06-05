@@ -105,11 +105,11 @@ int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 int crypto_kem_enc_derand(unsigned char *ct, unsigned char *ss, const unsigned char *pk, const unsigned char *coins)
 {
     unsigned char kr[2 * LORE_SYMBYTES];
-    unsigned char buf[LORE_MSG_BYTES + LORE_SYMBYTES];
+    unsigned char buf[2 * LORE_SYMBYTES];
 
-    hash_h(buf + LORE_MSG_BYTES, pk, LORE_PUBLICKEYBYTES);
-    memcpy(buf, coins, LORE_MSG_BYTES); 
-    hash_g(kr, buf, LORE_MSG_BYTES + LORE_SYMBYTES);
+    hash_h(buf, coins, LORE_MSG_BYTES);
+    hash_h(buf + LORE_SYMBYTES, pk, LORE_PUBLICKEYBYTES);
+    hash_g(kr, buf, 2 * LORE_SYMBYTES);
 
     // modi
     memset(ct, 0, LORE_CIPHERTEXTBYTES);
@@ -174,7 +174,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     int fail;
     unsigned char mu[LORE_MSG_BYTES]; 
     unsigned char kr[2 * LORE_SYMBYTES];
-    unsigned char buf[LORE_MSG_BYTES + LORE_SYMBYTES];
+    unsigned char buf[2 * LORE_SYMBYTES];
     unsigned char ct_cmp[LORE_CIPHERTEXTBYTES];
     unsigned char ss_invalid[LORE_SYMBYTES];
 
@@ -185,9 +185,9 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
 
     indcpa_dec(mu, ct, sk_indcpa);
 
-    memcpy(buf, mu, LORE_MSG_BYTES); 
-    memcpy(buf + LORE_MSG_BYTES, pkh, LORE_SYMBYTES);
-    hash_g(kr, buf, LORE_MSG_BYTES + LORE_SYMBYTES);
+    hash_h(buf, mu, LORE_MSG_BYTES);
+    memcpy(buf + LORE_SYMBYTES, pkh, LORE_SYMBYTES);
+    hash_g(kr, buf, 2 * LORE_SYMBYTES);
 
     // modi
     memset(ct_cmp, 0, LORE_CIPHERTEXTBYTES);
@@ -196,7 +196,15 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
 
     fail = verify(ct, ct_cmp, LORE_CIPHERTEXTBYTES);
 
-    rkprf(ss_invalid, z, ct);
+    // KDF(z || H(c')) for implicit rejection
+    {
+        unsigned char hash_cp[LORE_SYMBYTES];
+        hash_h(hash_cp, ct_cmp, LORE_CIPHERTEXTBYTES);
+        unsigned char fail_kdf[2 * LORE_SYMBYTES];
+        memcpy(fail_kdf, z, LORE_SYMBYTES);
+        memcpy(fail_kdf + LORE_SYMBYTES, hash_cp, LORE_SYMBYTES);
+        shake256(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+    }
 
 
     unsigned char kdf_buf[2 * LORE_SYMBYTES];
@@ -206,7 +214,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     memcpy(kdf_buf, kr, LORE_SYMBYTES); 
     
 
-    hash_h(kdf_buf + LORE_SYMBYTES, ct, LORE_CIPHERTEXTBYTES); 
+    hash_h(kdf_buf + LORE_SYMBYTES, ct_cmp, LORE_CIPHERTEXTBYTES); 
     
 
     shake256(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
