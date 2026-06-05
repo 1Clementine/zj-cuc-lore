@@ -46,6 +46,7 @@ SOURCES_BASE := \
 	reduce.c \
 	symmetric-shake.c \
 	fips202.c \
+	sm3.c \
 	toomcook.c \
 	verify.c \
 	bch_codec.c \
