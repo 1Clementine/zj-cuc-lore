@@ -21,10 +21,10 @@
 ## KAT
 
 - report/KAT_SHAKE/
-- L1: PK=610, CT=706, SK=2108, SS=32
-- L2: PK=1186, CT=1282, SK=4518, SS=32
-- L3: PK=1954, CT=2114, SK=7976, SS=32
-- L4: PK=2914, CT=3170, SK=11672, SS=32
+- L1: actual PK=545, CT=641, SK=821, SS=32 (buffer PK=610, CT=706, SK=2108)
+- L2: actual PK~1057, CT~1153, SK~1942, SS=32 (buffer PK=1186, CT=1282, SK=4518)
+- L3: actual PK~1762, CT~1922, SK~3704, SS=32 (buffer PK=1954, CT=2114, SK=7976)
+- L4: actual PK~2627, CT~2883, SK~5373, SS=32 (buffer PK=2914, CT=3170, SK=11672). L4 CT is ~3 bytes below PDF 2886 (see FINAL_SIZE_TABLE.md)
 
 ## Performance
 
