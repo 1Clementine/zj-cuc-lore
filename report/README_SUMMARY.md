@@ -1,34 +1,41 @@
-# Lore SHAKE256 Branch Report
+# Lore SHAKE256 Report
 
-## Version
+SHAKE/SHA3-interface version. Branch: SHAKE256.
 
-- Version directory: /home/syh/Work/zj-cuc-lore
-- Intended branch: SHAKE256
+**KEM layer**: H = SHA3-256, G = SHAKE256, KDF = SHAKE256.
 
-## KEM FO Layer
+## Files
 
-- H = SHA3-256
-- G = SHAKE256
-- KDF = SHAKE256
+| Path | Description |
+|------|-------------|
+| `FINAL_SIZE_TABLE.md` | 10000-trial actual size analysis |
+| `performance/perf_latest.csv` | Latest performance CSV |
+| `run_performance.sh` | One-click performance entry |
+| `performance_tests/` | bench_kem.c + build/run scripts |
+| `../Test_Vectors/` | KAT L1-L4 |
 
-## Encaps / Decaps Logic
+## Main Results
 
-- Encaps: G(H(m) || H(pk))
-- Decaps: G(H(m') || H(pk))
-- Success: KDF(Kbar' || H(c'))
-- Failure: KDF(z || H(c'))
+- KAT: L1-L4 Ref=Opt PASS.
+- Size: `CRYPTO_*BYTES` / `LORE_*BYTES` are buffer maxima. Actual = pack `bytes_written` before padding.
+  L4 CT: measured avg 2882.68 vs PDF 2886 (see FINAL_SIZE_TABLE.md).
 
-## KAT
+## Re-run Performance
 
-- report/KAT_SHAKE/
-- L1: actual PK=545, CT=641, SK=821, SS=32 (buffer PK=610, CT=706, SK=2108)
-- L2: actual PK~1057, CT~1153, SK~1942, SS=32 (buffer PK=1186, CT=1282, SK=4518)
-- L3: actual PK~1762, CT~1922, SK~3704, SS=32 (buffer PK=1954, CT=2114, SK=7976)
-- L4: actual PK~2627, CT~2883, SK~5373, SS=32 (buffer PK=2914, CT=3170, SK=11672). L4 CT is ~3 bytes below PDF 2886 (see FINAL_SIZE_TABLE.md)
+```bash
+cd /home/syh/Work/zj-cuc-lore/report
+bash run_performance.sh            # default 1000/100
+bash run_performance.sh 200 20     # quick test
+```
 
-## Performance
+## Re-run KAT
 
-- report/performance/
-- report/performance_tests/
-
-Note: KAT sizes are implementation fixed API sizes, not expected transmission sizes.
+```bash
+cd /home/syh/Work/zj-cuc-lore
+for impl in Reference_Implementation Optimized_Implementation; do
+  for lvl in 1 2 3 4; do
+    d="Implementations/$impl/Lore-L${lvl}"
+    (cd "$d" && make clean && make KAT_KEM_${lvl} && ./KAT_KEM_${lvl})
+  done
+done
+```
