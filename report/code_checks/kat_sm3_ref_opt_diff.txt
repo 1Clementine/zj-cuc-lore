@@ -1,8 +1,0 @@
-===== SM3 L1 Ref vs Opt =====
-L1 PASS: SM3 KAT retained
-===== SM3 L2 Ref vs Opt =====
-L2 PASS: SM3 KAT retained
-===== SM3 L3 Ref vs Opt =====
-L3 PASS: SM3 KAT retained
-===== SM3 L4 Ref vs Opt =====
-L4 PASS: SM3 KAT retained
