@@ -9,9 +9,12 @@ SM3_REPO="/home/syh/Work/zj-cuc-lore-sm3"
 
 ITERATIONS="${1:-1000}"
 WARMUP="${2:-100}"
+MODE="${MODE:-generic}"
+
+mkdir -p "$RESULTS_DIR"
 
 echo "============================================"
-echo "Lore KEM Performance Benchmark"
+echo "Lore KEM Performance Benchmark [MODE=$MODE]"
 echo "iterations=$ITERATIONS  warmup=$WARMUP"
 echo "SHAKE repo: $SHAKE_REPO"
 echo "SM3   repo: $SM3_REPO"
@@ -42,10 +45,7 @@ for version in SHAKE SM3; do
 
     for impl in Reference Optimized; do
         for level in 1 2 3 4; do
-            # Build
-            bash "$SCRIPT_DIR/build_bench.sh" "$repo" "$version" "$impl" "$level"
-
-            # Run
+            MODE="$MODE" bash "$SCRIPT_DIR/build_bench.sh" "$repo" "$version" "$impl" "$level"
             run_one "$repo" "$version" "$impl" "$level"
         done
     done
@@ -57,7 +57,6 @@ cat "$CSV_FILE"
 echo ""
 echo "CSV saved to: $CSV_FILE"
 
-# Summary
 echo ""
 echo "===== SUMMARY ====="
 awk -F, 'NR>1 {
@@ -71,7 +70,6 @@ END{
     for(k in cnt) printf "%-40s %12.2f %12.2f %12.2f %12.2f\n", k, sum[k]/cnt[k], min[k], max[k], 1000000000/(sum[k]/cnt[k])
 }' "$CSV_FILE" | sort
 
-# Check for mismatch warnings
 echo ""
 echo "===== DECAPS CORRECTNESS ====="
 grep -c "DECAPS MISMATCH" /dev/stderr 2>/dev/null || true
