@@ -1,0 +1,11 @@
+*.o
+*.a
+*.so
+# Compiled KAT binaries only (not source or template files)
+KAT_KEM_[1-9]
+KAT_SIG_[1-9]
+KAT_KEX_[1-9]
+output/
+build/
+results/
+.DS_Store
