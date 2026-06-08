@@ -1,5 +1,8 @@
 #include "reduce.h"
 #include "params.h"
+#ifdef LORE_USE_AVX2
+#include "avx2_utils.h"
+#endif
 
 #include <stdint.h>
 
@@ -45,17 +48,13 @@ void poly_reduce(poly *r)
     unsigned int i = 0;
     int16_t *p = r->coeffs;
 
-    for (; i + 7 < LORE_N; i += 8) {
-        p[i + 0] = barrett_reduce_scalar(p[i + 0]);
-        p[i + 1] = barrett_reduce_scalar(p[i + 1]);
-        p[i + 2] = barrett_reduce_scalar(p[i + 2]);
-        p[i + 3] = barrett_reduce_scalar(p[i + 3]);
-        p[i + 4] = barrett_reduce_scalar(p[i + 4]);
-        p[i + 5] = barrett_reduce_scalar(p[i + 5]);
-        p[i + 6] = barrett_reduce_scalar(p[i + 6]);
-        p[i + 7] = barrett_reduce_scalar(p[i + 7]);
+#ifdef LORE_USE_AVX2
+    for (; i + 16 <= LORE_N; i += 16) {
+        __m256i v = _mm256_loadu_si256((const __m256i *)&p[i]);
+        v = barrett_reduce_16way(v);
+        _mm256_storeu_si256((__m256i *)&p[i], v);
     }
-
+#endif
     for (; i < LORE_N; ++i) {
         p[i] = barrett_reduce_scalar(p[i]);
     }

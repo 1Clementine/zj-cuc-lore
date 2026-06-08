@@ -1,5 +1,6 @@
 #include "fips202.h"
 #include "auxfunc.h"
+#include "sm3.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -56,10 +57,8 @@ static int tagged_xof(uint8_t *out,
         memcpy(buf + 1, in, inlen);
     }
 
-    ret = pseudoXOF((unsigned long long)outlen * 8ULL,
-                    buf,
-                    (unsigned long long)tagged_len * 8ULL,
-                    out);
+    pseudoXOF((unsigned long long)outlen * 8, buf, (unsigned long long)tagged_len * 8, out);
+	    ret = 0;
 
     free(buf);
     return ret;

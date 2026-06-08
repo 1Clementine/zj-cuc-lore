@@ -9,14 +9,15 @@ LDFLAGS :=
 CPPFLAGS :=
 CFLAGS_BASE := -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith -fomit-frame-pointer -I.
 CFLAGS_ARCH ?=
+CFLAGS_AVX2 ?= -DLORE_USE_AVX2 -mavx2
 
 LEVELS := 1 2 3 4
 
 # Per-level flags
-CFLAGS_1 := $(CFLAGS_BASE) -DLORE_LEVEL=1
-CFLAGS_2 := $(CFLAGS_BASE) -DLORE_LEVEL=2
-CFLAGS_3 := $(CFLAGS_BASE) -DLORE_LEVEL=3
-CFLAGS_4 := $(CFLAGS_BASE) -DLORE_LEVEL=4
+CFLAGS_1 := $(CFLAGS_BASE) $(CFLAGS_AVX2) -DLORE_LEVEL=1
+CFLAGS_2 := $(CFLAGS_BASE) $(CFLAGS_AVX2) -DLORE_LEVEL=2
+CFLAGS_3 := $(CFLAGS_BASE) $(CFLAGS_AVX2) -DLORE_LEVEL=3
+CFLAGS_4 := $(CFLAGS_BASE) $(CFLAGS_AVX2) -DLORE_LEVEL=4
 
 # API_PKC KAT build:
 # force Lore's randombytes() to use drng_algorithm instead of OS entropy

@@ -1,5 +1,6 @@
 #include <string.h>
 #include "sm3.h"
+#include "auxfunc.h"
 
 #define L_SHIFT(a, n) ((a) << (n) | ((a) & 0xFFFFFFFF) >> (32 - (n)))
 #define P0(x) ((x) ^ L_SHIFT((x), 9) ^ L_SHIFT((x), 17))
@@ -106,31 +107,10 @@ static void sm3_bit(const unsigned char *msg, unsigned long long msg_bitlen, uns
 
 void sm3(uint8_t *out, const uint8_t *in, size_t inlen)
 {
-    sm3_bit(in, (unsigned long long)inlen * 8, out);
+    sm3hash(256, in, (unsigned long long)inlen * 8, out);
 }
 
 void sm3_kdf(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 {
-    uint8_t tmp[SM3_OUTLEN];
-    uint32_t ctr = 1;
-    while (outlen > 0)
-    {
-        uint8_t ctr_be[4];
-        ctr_be[0] = (uint8_t)(ctr >> 24);
-        ctr_be[1] = (uint8_t)(ctr >> 16);
-        ctr_be[2] = (uint8_t)(ctr >> 8);
-        ctr_be[3] = (uint8_t)(ctr);
-
-        uint8_t buf[4 + 512]; /* safe upper bound */
-        memcpy(buf, in, inlen);
-        memcpy(buf + inlen, ctr_be, 4);
-
-        sm3(tmp, buf, 4 + inlen);
-
-        size_t to_copy = (outlen < SM3_OUTLEN) ? outlen : SM3_OUTLEN;
-        memcpy(out, tmp, to_copy);
-        out += to_copy;
-        outlen -= to_copy;
-        ctr++;
-    }
+    pseudoXOF((unsigned long long)outlen * 8, in, (unsigned long long)inlen * 8, out);
 }

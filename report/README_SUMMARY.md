@@ -1,32 +1,65 @@
 # Lore SM3 Report
 
-SM3-interface version. Branch: SM3.
+This report summarizes the official-submission-aligned SM3 version.
 
-**KEM layer**: H = SM3, G = SM3-KDF, KDF = SM3-KDF.
-SM3-KDF = SM3(input || counter_be), counter from 0x00000001.
+## Branch Role
+
+- Branch: `SM3`
+- Role: official-submission-aligned implementation
+- Fixed hash: `sm3hash(256, ...)`
+- Variable-length XOF/KDF: `pseudoXOF(...)`
+- DRNG: official `drng.c/h`
+- KAT: official `KAT_KEM.c` and `KEM_AlgorithmInstance.c/h`
+
+The SHAKE256 branch is retained only as a comparison / legacy branch.
 
 ## Files
 
 | Path | Description |
-|------|-------------|
-| `FINAL_SIZE_TABLE.md` | 10000-trial actual size analysis |
-| `performance/perf_latest.csv` | Latest performance CSV |
-| `run_performance.sh` | One-click performance entry |
-| `performance_tests/` | bench_kem.c + build/run scripts |
-| `../Test_Vectors/` | KAT L1-L4 |
+|---|---|
+| `VALIDATION_REPORT.md` | Full validation report |
+| `FINAL_SIZE_TABLE.md` | Actual serialized size statistics |
+| `performance/perf_generic.csv` | Generic baseline performance |
+| `performance/perf_native_avx2.csv` | Native / AVX2 performance |
+| `run_performance.sh` | One-click performance test |
+| `performance_tests/` | Benchmark source and helper scripts |
+| `../Test_Vectors/` | Official-driver-generated KAT vectors |
 
-## Main Results
+## Main Status
 
-- KAT: L1-L4 Ref=Opt PASS.
-- Size: `CRYPTO_*BYTES` / `LORE_*BYTES` are buffer maxima. Actual = pack `bytes_written` before padding.
-  L4 CT: measured avg 2882.68 vs PDF 2886 (see FINAL_SIZE_TABLE.md).
+| Check | Status |
+|---|---|
+| Official auxfunc alignment | PASS |
+| Official KAT/API alignment | PASS |
+| Reference pure C | PASS |
+| Optimized AVX2 backend | PASS |
+| Ref/Opt L1-L4 KAT | PASS |
+| Ref/Opt vectors bit-identical | PASS |
+| Performance tests | PASS |
+| Size analysis | PASS with L4 CT caveat |
+
+## Known Caveat
+
+L4 ciphertext actual size differs from the paper table:
+
+- measured actual average: 2882.68 bytes
+- paper value: 2886 bytes
+
+This is documented in `FINAL_SIZE_TABLE.md`.
 
 ## Re-run Performance
 
+Generic baseline:
+
 ```bash
 cd /home/syh/Work/zj-cuc-lore-sm3/report
-bash run_performance.sh            # default 1000/100
-bash run_performance.sh 200 20     # quick test
+MODE=generic bash run_performance.sh 10000 1000
+```
+
+Native / AVX2:
+
+```bash
+MODE=native bash run_performance.sh 10000 1000
 ```
 
 ## Re-run KAT

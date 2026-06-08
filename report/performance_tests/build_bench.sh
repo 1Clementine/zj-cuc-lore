@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage: ./build_bench.sh <repo_path> <version_name> <impl> <level>
-# Example: ./build_bench.sh /home/syh/Work/zj-cuc-lore SHAKE Ref 1
+# MODE=generic (default) or MODE=native
 
 REPO="$1"
 VERSION="$2"
@@ -21,17 +21,38 @@ fi
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-# Determine CFLAGS based on impl
-if [ "$IMPL" = "Reference" ]; then
-    CFLAGS="-O3 -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith -fomit-frame-pointer"
-else
-    CFLAGS="-O3 -DNDEBUG -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith -fomit-frame-pointer"
+# --- MODE selection ---
+MODE="${MODE:-generic}"
+
+COMMON_CFLAGS="-O3 -DNDEBUG -std=gnu11 -Wall -Wextra"
+ARCH_CFLAGS=""
+
+case "$MODE" in
+  generic)
+    ARCH_CFLAGS=""
+    ;;
+  native)
+    arch="$(uname -m)"
+    if [ "$arch" = "x86_64" ]; then
+      ARCH_CFLAGS="-march=native"
+    elif [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ]; then
+      ARCH_CFLAGS="-mcpu=native"
+    fi
+    ;;
+  *)
+    echo "[ERROR] Unknown MODE=$MODE, use MODE=generic or MODE=native"
+    exit 1
+    ;;
+esac
+
+CFLAGS="$COMMON_CFLAGS $ARCH_CFLAGS -I$SRC_DIR -DLORE_LEVEL=$LEVEL -DLORE_USE_API_PKC_DRNG"
+
+# Enable AVX2 if Optimized implementation has avx2_utils.h
+if [ -f "$SRC_DIR/avx2_utils.h" ]; then
+    CFLAGS="$CFLAGS -DLORE_USE_AVX2 -mavx2"
 fi
 
-CFLAGS="$CFLAGS -I$SRC_DIR -DLORE_LEVEL=$LEVEL -DLORE_USE_API_PKC_DRNG"
-
-echo "=== Building $VERSION $IMPL L$LEVEL ==="
-echo "SRC: $SRC_DIR"
+echo "=== Building $VERSION $IMPL L$LEVEL [MODE=$MODE] ==="
 echo "CFLAGS: $CFLAGS"
 
 # Compile all source files into objects
@@ -41,7 +62,6 @@ SRC_FILES=(
     randombytes.c auxfunc.c KEM_AlgorithmInstance.c drng.c
 )
 
-# Check for sm3.c
 if [ -f "$SRC_DIR/sm3.c" ]; then
     SRC_FILES+=(sm3.c)
 fi
@@ -55,7 +75,6 @@ for f in "${SRC_FILES[@]}"; do
     fi
 done
 
-# Compile and link bench_kem
 gcc $CFLAGS -c "$BENCH_C" -o "$BUILD_DIR/bench_kem.o"
 gcc $CFLAGS "$BUILD_DIR/bench_kem.o" $OBJS -o "$BUILD_DIR/bench_kem" -lm
 

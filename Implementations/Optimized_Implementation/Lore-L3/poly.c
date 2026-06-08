@@ -7,6 +7,9 @@
 #include "ntt.h"
 #include "randombytes.h"
 #include "reduce.h"
+#ifdef LORE_USE_AVX2
+#include "avx2_utils.h"
+#endif
 #include "sampler.h"
 #include "symmetric.h"
 #include "toomcook.h"
@@ -283,12 +286,27 @@ void poly_crt_sub(poly_crt *r, const poly_crt *a, const poly_crt *b) {
 * - const poly *b: pointer to the second input polynomial
 **************************************************/
  void poly_add(poly *r, const poly *a, const poly *b) {
+#ifdef LORE_USE_AVX2
+     int i = 0;
+     for (; i + 16 <= LORE_N; i += 16) {
+         __m256i va = _mm256_loadu_si256((const __m256i *)&a->coeffs[i]);
+         __m256i vb = _mm256_loadu_si256((const __m256i *)&b->coeffs[i]);
+         __m256i vsum = _mm256_add_epi16(va, vb);
+         vsum = barrett_reduce_16way(vsum);
+         _mm256_storeu_si256((__m256i *)&r->coeffs[i], vsum);
+     }
+     for (; i < LORE_N; ++i) {
+         int32_t t = (int32_t)a->coeffs[i] + (int32_t)b->coeffs[i];
+         r->coeffs[i] = barrett_reduce((int16_t)t);
+     }
+#else
      for(int i=0; i<LORE_N; ++i) {
          r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
      }
      for(int i=0; i<LORE_N; ++i) {
          r->coeffs[i] = barrett_reduce(r->coeffs[i]);
      }
+#endif
  }
 
 
