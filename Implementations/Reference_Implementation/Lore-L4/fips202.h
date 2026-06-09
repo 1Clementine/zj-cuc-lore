@@ -12,18 +12,11 @@
 
 #define FIPS202_NAMESPACE(s) pqcrystals_kyber_fips202_ref_##s
 
-/*
- * Compatibility state used by the auxfunc-backed replacement layer.
- * This is no longer a real Keccak permutation state.
- * Instead it stores absorbed input bytes and squeeze progress.
- */
 typedef struct {
-    uint8_t input[LORE_AUX_INPUT_MAX];
-    size_t inlen;
-    size_t outpos;
-    uint8_t mode;
+    uint64_t s[25];
+    unsigned int pos;
+    unsigned int rate;
     uint8_t finalized;
-    uint8_t overflow;
 } keccak_state;
 
 #define shake128_init FIPS202_NAMESPACE(shake128_init)

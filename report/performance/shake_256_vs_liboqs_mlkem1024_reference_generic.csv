@@ -1,0 +1,7 @@
+scheme,operation,avg_us
+Lore-SHAKE-L4,keypair,388.56
+Lore-SHAKE-L4,encaps,516.44
+Lore-SHAKE-L4,decaps,671.46
+ML-KEM-1024,keypair,65.23
+ML-KEM-1024,encaps,137.69
+ML-KEM-1024,decaps,217.77

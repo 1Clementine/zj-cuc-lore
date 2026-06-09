@@ -1,0 +1,8 @@
+  Reference_Implementation L1: PURE SHAKE (3 Keccak refs, 318 lines)
+  Reference_Implementation L2: PURE SHAKE (3 Keccak refs, 318 lines)
+  Reference_Implementation L3: PURE SHAKE (3 Keccak refs, 318 lines)
+  Reference_Implementation L4: PURE SHAKE (3 Keccak refs, 318 lines)
+  Optimized_Implementation L1: WRAPPER (has 3 pseudoXOF/sm3hash refs)
+  Optimized_Implementation L2: WRAPPER (has 3 pseudoXOF/sm3hash refs)
+  Optimized_Implementation L3: WRAPPER (has 3 pseudoXOF/sm3hash refs)
+  Optimized_Implementation L4: WRAPPER (has 3 pseudoXOF/sm3hash refs)
