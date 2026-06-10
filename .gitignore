@@ -16,3 +16,6 @@ Implementations/**/test_speed_*
 # Temporary files
 *.tmp
 *.bak
+bench/results/
+bench/results/*
+bench_lore_shake_kem_cycles_time

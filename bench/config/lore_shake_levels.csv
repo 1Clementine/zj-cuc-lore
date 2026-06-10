@@ -1,0 +1,5 @@
+level,paper_name,classical_security,kappa,n,k,t
+Lore-L1,Lore-128,128,128,512,1,2
+Lore-L2,Lore-256,256,256,512,2,2
+Lore-L3,Lore-384,384,384,512,3,4
+Lore-L4,Lore-512,512,512,768,3,4

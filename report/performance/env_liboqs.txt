@@ -1,5 +1,0 @@
-date: 2026年 06月 09日 星期二 09:35:33 CST
-pwd: /home/syh/Work/liboqs
-git branch: main
-git commit: f986aea60a9f3cb4055474aa212538bb0b14f1fe
-gcc: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0

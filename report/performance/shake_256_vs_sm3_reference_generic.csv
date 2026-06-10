@@ -1,4 +1,0 @@
-level,operation,shake_avg_us,sm3_avg_us,sm3_over_shake_ratio
-L4,keypair,388.56,1029.20,2.65
-L4,encaps,516.44,1157.50,2.24
-L4,decaps,671.46,1267.94,1.89

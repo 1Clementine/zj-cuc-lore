@@ -1,8 +1,0 @@
-date: 2026年 06月 09日 星期二 09:31:00 CST
-hostname: ubuntu-Precision-7920-Tower
-pwd: /home/syh/Work/zj-cuc-lore
-git branch: SHAKE256
-git commit: 8eb94b1e0f502e67bc49e83589c474c7980619f4
-gcc: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
-CPU: 
-CPU cores: 32
