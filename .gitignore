@@ -1,0 +1,18 @@
+
+# Build artifacts
+*.o
+*.a
+*.so
+obj/
+build/
+report/performance_tests/build/
+
+# Generated KAT outputs inside implementation directories
+Implementations/**/output/
+Implementations/**/KAT_KEM_*
+Implementations/**/test_lore_*
+Implementations/**/test_speed_*
+
+# Temporary files
+*.tmp
+*.bak
