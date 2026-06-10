@@ -6,7 +6,9 @@ SHAKE/SHA3-interface comparison branch. **Lore-L4 only.**
 
 This is a **256-bit security comparison / legacy** branch. The SM3 branch is the official-submission-aligned version.
 
-Only **Reference_Implementation/Lore-L4** is active. All other levels (L1-L3) and the Optimized_Implementation (SM3/pseudoXOF wrapper) have been archived to `debug/`.
+Only **Reference_Implementation/Lore-L4** is active. L1-L3 and the Optimized_Implementation (SM3/pseudoXOF wrapper) have been archived.
+
+L1-specific optimizations (t=2 bitset, zero-noise shortcut, q-only pointwise) are not applicable to L4 because L4 uses t=4. The L1 optimization note is archived at `docs/archive/`. Current L4 is a validated stable baseline, not claimed as globally optimal.
 
 **KEM layer**: H = SHA3-256, G = SHAKE256, KDF = SHAKE256. Pure Keccak/SHAKE FIPS202 (no SM3 wrapper).
 

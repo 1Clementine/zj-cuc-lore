@@ -1,0 +1,291 @@
+--- % LORE_Q or / LORE_Q ---
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:514:        int32_t x_q = cv_crt.q_poly.coeffs[i] % LORE_Q;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:521:        int32_t x_q_prime = ((x_q << LORE_L) + (LORE_Q >> 1)) / LORE_Q;
+Implementations/Reference_Implementation/Lore-L4/poly.c:509:                a_q = a_q % LORE_Q;
+
+--- rej_uniform / uniform ---
+Implementations/Reference_Implementation/Lore-L4/poly.h:81:#define rej_uniform_q LORE_NAMESPACE(rej_uniform_q)
+Implementations/Reference_Implementation/Lore-L4/poly.h:82:unsigned int rej_uniform_q(int16_t *r, unsigned int len, const uint8_t *buf, unsigned int buflen);
+Implementations/Reference_Implementation/Lore-L4/poly.h:83:#define rej_uniform_t LORE_NAMESPACE(rej_uniform_t)
+Implementations/Reference_Implementation/Lore-L4/poly.h:84:unsigned int rej_uniform_t(int16_t *r, unsigned int len, const uint8_t *buf, unsigned int buflen);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:250:      // Note: We use the rej_uniform_q function here.
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:251:      ctr_q = rej_uniform_q(a[i].vec[j].q_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:255:        ctr_q += rej_uniform_q(a[i].vec[j].q_poly.coeffs + ctr_q, LORE_N - ctr_q, buf, SHAKE128_RATE);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:260:      // Requires the rej_uniform_t function
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:261:      ctr_t = rej_uniform_t(a[i].vec[j].t_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:265:        ctr_t += rej_uniform_t(a[i].vec[j].t_poly.coeffs + ctr_t, LORE_N - ctr_t, buf, SHAKE128_RATE);
+Implementations/Reference_Implementation/Lore-L4/poly.c:712:* Name:        rej_uniform_q
+Implementations/Reference_Implementation/Lore-L4/poly.c:724:unsigned int rej_uniform_q(int16_t *r,
+Implementations/Reference_Implementation/Lore-L4/poly.c:744:* Name:        rej_uniform_t
+Implementations/Reference_Implementation/Lore-L4/poly.c:756:unsigned int rej_uniform_t(int16_t *r,
+
+--- poly_getnoise ---
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:378:    poly_getnoise(&s_crt, s_t_sparse, (unsigned char*)noiseseed, 0);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:459:    poly_getnoise(&sp_crt, sp_t_sparse, (unsigned char*)coins, 0);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:502:    poly_getnoise_uniform(&e_pp, LORE_T, coins, (unsigned char)LORE_K);
+Implementations/Reference_Implementation/Lore-L4/poly.h:58:#define poly_getnoise_uniform LORE_NAMESPACE(poly_getnoise_uniform)
+Implementations/Reference_Implementation/Lore-L4/poly.h:59:void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsigned char nonce);
+Implementations/Reference_Implementation/Lore-L4/poly.h:78:#define poly_getnoise LORE_NAMESPACE(poly_getnoise)
+Implementations/Reference_Implementation/Lore-L4/poly.h:79:void poly_getnoise(poly_crt_vec *r_crt_vec, poly_sparse *r_sparse_vec, unsigned char *seed, unsigned char nonce);
+Implementations/Reference_Implementation/Lore-L4/poly.c:327:* Name:        poly_getnoise
+Implementations/Reference_Implementation/Lore-L4/poly.c:336:void poly_getnoise(poly_crt_vec *r_crt_vec, poly_sparse *r_sparse_vec, unsigned char *seed, unsigned char nonce)
+Implementations/Reference_Implementation/Lore-L4/poly.c:342:* Name:        poly_getnoise_uniform
+Implementations/Reference_Implementation/Lore-L4/poly.c:352:void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsigned char nonce)
+
+--- NTT / basemul ---
+Implementations/Reference_Implementation/Lore-L4/ntt.c:4:#include "ntt.h"
+Implementations/Reference_Implementation/Lore-L4/ntt.c:34:* Name:        basemul4
+Implementations/Reference_Implementation/Lore-L4/ntt.c:44:static void basemul4(int16_t r[4], const int16_t a[4], const int16_t b[4], int16_t zeta) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:57:void ntt(int16_t r[512]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:73:void invntt_tomont(int16_t r[512]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:92:void poly_mul_ntt(int16_t r[512], const int16_t a[512], const int16_t b[512]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:95:        basemul4(&r[8*i],   &a[8*i],   &b[8*i],   zeta);
+Implementations/Reference_Implementation/Lore-L4/ntt.c:96:        basemul4(&r[8*i+4], &a[8*i+4], &b[8*i+4], -zeta);
+Implementations/Reference_Implementation/Lore-L4/ntt.c:103:* Name:        basemul6
+Implementations/Reference_Implementation/Lore-L4/ntt.c:113:static void basemul6(int16_t r[6], const int16_t a[6], const int16_t b[6], int16_t zeta) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:128:void ntt(int16_t r[768]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:144:void invntt_tomont(int16_t r[768]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:163:void poly_mul_ntt(int16_t r[768], const int16_t a[768], const int16_t b[768]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:166:        basemul6(&r[12*i],   &a[12*i],   &b[12*i],   zeta);
+Implementations/Reference_Implementation/Lore-L4/ntt.c:167:        basemul6(&r[12*i+6], &a[12*i+6], &b[12*i+6], -zeta);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:7:* Name:        polyvec_ntt
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:13:void polyvec_ntt(polyvec *v) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:15:        poly_ntt(&v->vec[i]);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:20:* Name:        polyvec_invntt_tomont
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:26:void polyvec_invntt_tomont(polyvec *v) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:28:        poly_invntt_tomont(&v->vec[i]);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:33:* Name:        polyvec_pointwise_acc_montgomery
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:41:void polyvec_pointwise_acc_montgomery(poly *r, const polyvec *a, const polyvec *b) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:43:    poly_pointwise_montgomery(r, &a->vec[0], &b->vec[0]);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:45:        poly_pointwise_montgomery(&t, &a->vec[i], &b->vec[i]);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:80:* Name:        poly_crt_vec_ntt
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:86:void poly_crt_vec_ntt(poly_crt_vec *v) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:88:        poly_ntt(&v->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:92:* Name:        poly_crt_vec_invntt_tomont
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:98:void poly_crt_vec_invntt_tomont(poly_crt_vec *v) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:100:        poly_invntt_tomont(&v->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:104:* Name:        poly_crt_vec_pointwise_acc_montgomery
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:116:void poly_crt_vec_pointwise_acc_montgomery(poly_crt *r, const poly_crt_vec *a_row_dense, const poly_crt_vec *b_dense) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:120:    poly_pointwise_montgomery(&r->q_poly, &a_row_dense->vec[0].q_poly, &b_dense->vec[0].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:122:        poly_pointwise_montgomery(&t.q_poly, &a_row_dense->vec[i].q_poly, &b_dense->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:149:* Name:        poly_crt_vec_pointwise_acc_montgomery_sparse
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:159:* - const poly_crt_vec *b_crt_with_ntt_q:  pointer to the sparse vector (with NTT'd q-part)
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:162:void poly_crt_vec_pointwise_acc_montgomery_sparse(poly_crt *r, const poly_crt_vec *a_row_dense, const poly_crt_vec *b_crt_with_ntt_q, const poly_sparse *b_t_poly_sparse_vec) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:166:    poly_pointwise_montgomery(&r->q_poly, &a_row_dense->vec[0].q_poly, &b_crt_with_ntt_q->vec[0].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:168:        poly_pointwise_montgomery(&t_q_only.q_poly, &a_row_dense->vec[i].q_poly, &b_crt_with_ntt_q->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:210:    gen_matrix_ntt(a, seed, 0); // Add 0 to indicate non-transposed
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:215:* Name:        gen_matrix_ntt
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:223:void gen_matrix_ntt(poly_crt_vec a[LORE_K], const unsigned char *seed, int transposed)
+Implementations/Reference_Implementation/Lore-L4/poly.c:7:#include "ntt.h"
+Implementations/Reference_Implementation/Lore-L4/poly.c:378:* Name:        poly_ntt
+Implementations/Reference_Implementation/Lore-L4/poly.c:384:void poly_ntt(poly *r) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:385:    ntt(r->coeffs);
+Implementations/Reference_Implementation/Lore-L4/poly.c:390:* Name:        poly_invntt_tomont
+Implementations/Reference_Implementation/Lore-L4/poly.c:396:void poly_invntt_tomont(poly *r) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:397:    invntt_tomont(r->coeffs);
+Implementations/Reference_Implementation/Lore-L4/poly.c:401:* Name:        poly_pointwise_montgomery
+Implementations/Reference_Implementation/Lore-L4/poly.c:405:void poly_pointwise_montgomery(poly *r, const poly *a, const poly *b) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:406:    poly_mul_ntt(r->coeffs, a->coeffs, b->coeffs);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:12:* Name:        pack_pk_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:18:* - const poly_crt_vec *b_ntt:   pointer to the polynomial vector b in NTT domain
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:20:static void pack_pk_ntt(unsigned char *r, const unsigned char *seedA, const poly_crt_vec *b_ntt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:30:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &b_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:54:            p_t_indices[j] = (uint8_t)find_closest_r_idx(b_ntt->vec[i].t_poly.coeffs[j]);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:71:* Name:        unpack_pk_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:75:* Arguments:   - poly_crt_vec *b_ntt:      pointer to the output polynomial vector b in NTT domain
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:79:static void unpack_pk_ntt(poly_crt_vec *b_ntt, unsigned char *seedA, const unsigned char *pk) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:98:        lore_poly_unpack_q_split(&b_ntt->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:110:            b_ntt->vec[i].t_poly.coeffs[j] = (int16_t)(2 * p_t_indices[j]);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:116:            b_ntt->vec[i].t_poly.coeffs[j] = 0;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:130:* - const poly_crt_vec *s_crt_ntt: pointer to input secret vector
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:132:static void pack_sk(unsigned char *r, const poly_sparse *s_t_sparse, const poly_crt_vec *s_crt_ntt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:153:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &s_crt_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:180:* Arguments:   - poly_crt_vec *s_crt_ntt_q: pointer to output secret vector
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:184:static void unpack_sk(poly_crt_vec *s_crt_ntt_q, poly_sparse *s_t_sparse, const unsigned char *sk) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:213:        lore_poly_unpack_q_split(&s_crt_ntt_q->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:216:        memset(s_crt_ntt_q->vec[i].t_poly.coeffs, 0, LORE_POLY_BYTES);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:218:            s_crt_ntt_q->vec[i].t_poly.coeffs[s_t_sparse[i].pos[j]] = s_t_sparse[i].val[j];
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:224:* Name:        pack_ciphertext_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:229:* - const poly_crt_vec *cu_ntt:  pointer to the polynomial vector cu in NTT domain
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:232:static void pack_ciphertext_ntt(unsigned char *r, const poly_crt_vec *cu_ntt, const poly_crt *cv_crt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:241:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &cu_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:262:            t_indices[j] = (uint8_t)find_closest_r_idx(cu_ntt->vec[i].t_poly.coeffs[j]);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:289:* Name:        unpack_ciphertext_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:293:* Arguments:   - poly_crt_vec *cu_ntt:      pointer to the output polynomial vector cu in NTT domain
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:297:static void unpack_ciphertext_ntt(poly_crt_vec *cu_ntt, poly_crt *cv_crt, const unsigned char *c) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:310:        lore_poly_unpack_q_split(&cu_ntt->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:323:            cu_ntt->vec[i].t_poly.coeffs[j] = (int16_t)(2 * t_indices[j] );
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:328:        for(int j=0; j<LORE_N; ++j) cu_ntt->vec[i].t_poly.coeffs[j] = 0;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:365:    poly_crt_vec a_ntt[LORE_K];
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:376:    gen_matrix_ntt(a_ntt, seedA, 0);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:380:    poly_crt_vec_ntt(&s_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:384:        poly_crt_vec_pointwise_acc_montgomery_sparse(&b_final.vec[i], &a_ntt[i], &s_crt, s_t_sparse);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:386:        poly_crt_vec_pointwise_acc_montgomery(&b_final.vec[i], &a_ntt[i], &s_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:401:        poly_ntt(&delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:410:    pack_pk_ntt(pk, seedA, &b_final);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:444:    poly_crt_vec at_ntt[LORE_K];
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:446:    poly_crt_vec b_ntt;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:454:    unpack_pk_ntt(&b_ntt, seedA, pk);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:457:    gen_matrix_ntt(at_ntt, seedA, 1); 
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:461:    poly_crt_vec_ntt(&sp_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:466:        poly_crt_vec_pointwise_acc_montgomery_sparse(&cu_final.vec[i], &at_ntt[i], &sp_crt, sp_t_sparse);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:469:        poly_crt_vec_pointwise_acc_montgomery(&cu_final.vec[i], &at_ntt[i], &sp_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:484:        poly_ntt(&delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:493:    poly_crt_vec_pointwise_acc_montgomery_sparse(&cv_crt, (const poly_crt_vec*)&b_ntt, &sp_crt, sp_t_sparse);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:495:    poly_invntt_tomont(&cv_crt.q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:539:    pack_ciphertext_ntt(c, &cu_final, &cv_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:556:    poly_crt_vec cu_ntt;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:563:    unpack_ciphertext_ntt(&cu_ntt, &cv_crt, c);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:568:    poly_crt_vec_pointwise_acc_montgomery_sparse(&s_dot_cu, (const poly_crt_vec*)&cu_ntt, &s_crt, s_t_sparse);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:570:    poly_invntt_tomont(&s_dot_cu.q_poly);
+
+--- poly_mul / toomcook ---
+Implementations/Reference_Implementation/Lore-L4/ntt.c:92:void poly_mul_ntt(int16_t r[512], const int16_t a[512], const int16_t b[512]) {
+Implementations/Reference_Implementation/Lore-L4/ntt.c:163:void poly_mul_ntt(int16_t r[768], const int16_t a[768], const int16_t b[768]) {
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:110:* - t-part uses Karatsuba (poly_mul_modt).
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:129:    poly_mul_modt(&r->t_poly, &a_row_dense->vec[0].t_poly, &b_dense->vec[0].t_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:132:        poly_mul_modt(&t_prod, &a_row_dense->vec[i].t_poly, &b_dense->vec[i].t_poly);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:187:    poly_mul_modt(&r->t_poly, &a_row_dense->vec[0].t_poly, &b_t_dense_temp);
+Implementations/Reference_Implementation/Lore-L4/polyvec.c:193:        poly_mul_modt(&t_temp_prod_local, &a_row_dense->vec[i].t_poly, &b_t_dense_temp);
+Implementations/Reference_Implementation/Lore-L4/poly.c:12:#include "toomcook.h"
+Implementations/Reference_Implementation/Lore-L4/poly.c:406:    poly_mul_ntt(r->coeffs, a->coeffs, b->coeffs);
+Implementations/Reference_Implementation/Lore-L4/poly.c:777:* Name:        poly_mul_modt
+Implementations/Reference_Implementation/Lore-L4/poly.c:785:void poly_mul_modt(poly *r, const poly *a, const poly *b) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:788:    poly_mul_acc(a->coeffs, b->coeffs, res_full); // Underlying polynomial multiplication.
+Implementations/Reference_Implementation/Lore-L4/poly.c:916:* Name:        poly_mul_schoolbook_q
+Implementations/Reference_Implementation/Lore-L4/poly.c:917:* Description: Normal domain schoolbook multiplication mod (Q, X^N+1)
+Implementations/Reference_Implementation/Lore-L4/poly.c:919:void poly_mul_schoolbook_q(poly *r, const poly *a, const poly *b) {
+Implementations/Reference_Implementation/Lore-L4/toomcook.c:1:#include "toomcook.h"
+Implementations/Reference_Implementation/Lore-L4/toomcook.c:150:* Name:        poly_mul_acc
+Implementations/Reference_Implementation/Lore-L4/toomcook.c:160:void poly_mul_acc(const int16_t a[LORE_N], const int16_t b[LORE_N], int16_t res[LORE_N]) {
+
+--- delta ---
+Implementations/Reference_Implementation/Lore-L4/poly.c:687:* Name:        poly_add_scaled_msg
+Implementations/Reference_Implementation/Lore-L4/poly.c:694:void poly_add_scaled_msg(poly_crt *r, const poly *msg_poly) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:391:        poly delta_q_std;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:397:            int16_t delta_val = sym_mod(r_val - x_t, LORE_T);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:398:            delta_q_std.coeffs[j] = delta_val;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:401:        poly_ntt(&delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:402:        poly_add(&b_final.vec[i].q_poly, &b_final.vec[i].q_poly, &delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:474:        poly delta_q_std;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:480:            int16_t delta_val = sym_mod(r_val - x_t, LORE_T);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:481:            delta_q_std.coeffs[j] = delta_val;
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:484:        poly_ntt(&delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:485:        poly_add(&cu_final.vec[i].q_poly, &cu_final.vec[i].q_poly, &delta_q_std);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:510:    poly_add_scaled_msg(&cv_crt, &msg_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:529:        int32_t delta_q = sym_mod(x_q_prime_prime - x_q, LORE_Q);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:531:        int32_t x_t_prime = (x_t + delta_q) % LORE_T;
+
+--- pack/unpack ---
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:12:* Name:        pack_pk_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:20:static void pack_pk_ntt(unsigned char *r, const unsigned char *seedA, const poly_crt_vec *b_ntt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:30:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &b_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:56:        pack_t_bits(t_ptr, p_t_indices);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:71:* Name:        unpack_pk_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:73:* Description: Unpacks the public key from a byte array.
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:79:static void unpack_pk_ntt(poly_crt_vec *b_ntt, unsigned char *seedA, const unsigned char *pk) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:98:        lore_poly_unpack_q_split(&b_ntt->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:107:        unpack_t_bits(p_t_indices, t_ptr);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:124:* Name:        pack_sk
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:132:static void pack_sk(unsigned char *r, const poly_sparse *s_t_sparse, const poly_crt_vec *s_crt_ntt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:153:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &s_crt_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:176:* Name:        unpack_sk
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:178:* Description: Unpacks the secret key from a byte array.
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:184:static void unpack_sk(poly_crt_vec *s_crt_ntt_q, poly_sparse *s_t_sparse, const unsigned char *sk) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:213:        lore_poly_unpack_q_split(&s_crt_ntt_q->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:224:* Name:        pack_ciphertext_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:232:static void pack_ciphertext_ntt(unsigned char *r, const poly_crt_vec *cu_ntt, const poly_crt *cv_crt) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:241:        size_t bits_written = lore_poly_pack_q_split(main_ptr, temp_overflow_buf, &cu_ntt->vec[i].q_poly);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:264:        pack_t_bits(ptr, t_indices);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:289:* Name:        unpack_ciphertext_ntt
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:291:* Description: Unpacks the ciphertext from a byte array.
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:297:static void unpack_ciphertext_ntt(poly_crt_vec *cu_ntt, poly_crt *cv_crt, const unsigned char *c) {
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:310:        lore_poly_unpack_q_split(&cu_ntt->vec[i].q_poly, main_ptr + (i * LORE_N), overflow_ptr, &overflow_bit_pos);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:320:        unpack_t_bits(t_indices, ptr);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:332:    // Unpack x'_q of Cv and recover x''_q via Algorithm 6.
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:410:    pack_pk_ntt(pk, seedA, &b_final);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:411:    pack_sk(sk, s_t_sparse, &s_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:454:    unpack_pk_ntt(&b_ntt, seedA, pk);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:539:    pack_ciphertext_ntt(c, &cu_final, &cv_crt);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:563:    unpack_ciphertext_ntt(&cu_ntt, &cv_crt, c);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:565:    unpack_sk(&s_crt, s_t_sparse, sk);
+Implementations/Reference_Implementation/Lore-L4/poly.c:410:* Name:        pack_t_bits
+Implementations/Reference_Implementation/Lore-L4/poly.c:418:void pack_t_bits(unsigned char *r, const uint8_t *t_indices) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:430:* Name:        unpack_t_bits
+Implementations/Reference_Implementation/Lore-L4/poly.c:432:* Description: Unpacks the t-part indices from a byte array.
+Implementations/Reference_Implementation/Lore-L4/poly.c:437:void unpack_t_bits(uint8_t *t_indices, const unsigned char *r) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:850:* Name:        lore_poly_pack_q_split
+Implementations/Reference_Implementation/Lore-L4/poly.c:856:* - const poly *p:                     input, the polynomial to pack
+Implementations/Reference_Implementation/Lore-L4/poly.c:860:size_t lore_poly_pack_q_split(unsigned char main_buf[LORE_N], unsigned char *overflow_buf, const poly *p) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:892:* Name:        lore_poly_unpack_q_split
+Implementations/Reference_Implementation/Lore-L4/poly.c:901:void lore_poly_unpack_q_split(poly *p, const unsigned char main_buf[LORE_N], const unsigned char *overflow_buf, int *overflow_bit_pos) {
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1378:static int pack_databuf(  struct bch_control *bch , const uint8_t *data)
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1401:static void unpack_eccbits( struct bch_control *bch , uint8_t * ecc)
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1413:static void pack_eccbits(struct bch_control *bch ,const uint8_t * ecc)
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1442:    int ndatabytes = pack_databuf(bch,data);
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1446:    unpack_eccbits(bch,ecc);
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1477:    nbytes = pack_databuf(bch,data);
+Implementations/Reference_Implementation/Lore-L4/bch_codec.c:1479:    pack_eccbits(bch,recv_ecc);
+
+--- shake256 ---
+Implementations/Reference_Implementation/Lore-L4/kem.c:36:    shake256(out, 2 * LORE_SYMBYTES, in, inlen);
+Implementations/Reference_Implementation/Lore-L4/kem.c:129:    shake256(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+Implementations/Reference_Implementation/Lore-L4/kem.c:206:        shake256(ss_invalid, LORE_SYMBYTES, fail_kdf, 2 * LORE_SYMBYTES);
+Implementations/Reference_Implementation/Lore-L4/kem.c:220:    shake256(ss_valid, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:374:    shake256(buf, 2 * LORE_SYMBYTES, coins, LORE_SYMBYTES);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:234:void shake128_init(keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:239:void shake128_absorb(keccak_state *state, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:244:void shake128_finalize(keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:249:void shake128_squeeze(uint8_t *out, size_t outlen, keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:251:    shake128_finalize(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:255:void shake128_absorb_once(keccak_state *state, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:257:    shake128_init(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:258:    shake128_absorb(state, in, inlen);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:259:    shake128_finalize(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:262:void shake128_squeezeblocks(uint8_t *out, size_t nblocks, keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:267:void shake256_init(keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:272:void shake256_absorb(keccak_state *state, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:277:void shake256_finalize(keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:282:void shake256_squeeze(uint8_t *out, size_t outlen, keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:284:    shake256_finalize(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:288:void shake256_absorb_once(keccak_state *state, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:290:    shake256_init(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:291:    shake256_absorb(state, in, inlen);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:292:    shake256_finalize(state);
+Implementations/Reference_Implementation/Lore-L4/fips202.c:295:void shake256_squeezeblocks(uint8_t *out, size_t nblocks, keccak_state *state)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:300:void shake128(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/fips202.c:305:void shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:25:    shake128_absorb_once(s, extseed, sizeof(extseed));
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:40:    shake128_squeezeblocks(out, outblocks, s);
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:47:*              Concatenates key and nonce, then expands with shake256 wrapper.
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:61:    shake256(out, outlen, extkey, sizeof(extkey));
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:72:void lore_shake256_rkprf(unsigned char out[LORE_SYMBYTES],
+Implementations/Reference_Implementation/Lore-L4/symmetric-shake.c:81:    shake256(out, LORE_SYMBYTES, buf, sizeof(buf));
+
+--- barrett_reduce ---
+Implementations/Reference_Implementation/Lore-L4/ntt.c:28:  return (int16_t)montgomery_reduce((int64_t)a * b);
+Implementations/Reference_Implementation/Lore-L4/ntt.c:83:                r[j] = barrett_reduce(t + r[j + len]);
+Implementations/Reference_Implementation/Lore-L4/ntt.c:154:                r[j] = barrett_reduce(t + r[j + len]);
+Implementations/Reference_Implementation/Lore-L4/poly.c:16:* Name:        center_mod_257
+Implementations/Reference_Implementation/Lore-L4/poly.c:25:static inline int16_t center_mod_257(int32_t x) {
+Implementations/Reference_Implementation/Lore-L4/poly.c:224:        pc->q_poly.coeffs[i] = barrett_reduce(p->coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/poly.c:245:        r->q_poly.coeffs[i] = center_mod_257(a->q_poly.coeffs[i] + b->q_poly.coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/poly.c:266:        r->q_poly.coeffs[i] = barrett_reduce(a->q_poly.coeffs[i] - b->q_poly.coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/poly.c:290:         r->coeffs[i] = barrett_reduce(r->coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/poly.c:700:        r->q_poly.coeffs[i] = center_mod_257(q_sum);
+Implementations/Reference_Implementation/Lore-L4/poly.c:737:      r[ctr++] = barrett_reduce((int16_t)val);
+Implementations/Reference_Implementation/Lore-L4/poly.c:866:        coeff = barrett_reduce(coeff);
+Implementations/Reference_Implementation/Lore-L4/poly.c:932:        r->coeffs[j] = center_mod_257(val);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:339:        cv_crt->q_poly.coeffs[j] = barrett_reduce((int16_t)x_q_prime_prime);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:497:        cv_crt.q_poly.coeffs[i] = montgomery_reduce((int64_t)cv_crt.q_poly.coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:504:        cv_crt.q_poly.coeffs[i] = barrett_reduce(cv_crt.q_poly.coeffs[i] + e_pp.coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/indcpa.c:573:      s_dot_cu.q_poly.coeffs[i] = montgomery_reduce((int32_t)s_dot_cu.q_poly.coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/reduce.c:6:* Name:        montgomery_reduce
+Implementations/Reference_Implementation/Lore-L4/reduce.c:13:* Returns:     montgomery_reduce(a) mod q.
+Implementations/Reference_Implementation/Lore-L4/reduce.c:15:int16_t montgomery_reduce(int64_t a) {
+Implementations/Reference_Implementation/Lore-L4/reduce.c:28:* Name:        barrett_reduce
+Implementations/Reference_Implementation/Lore-L4/reduce.c:37:int16_t barrett_reduce(int16_t a) {
+Implementations/Reference_Implementation/Lore-L4/reduce.c:62:        r->coeffs[i]   = barrett_reduce(r->coeffs[i]);
+Implementations/Reference_Implementation/Lore-L4/reduce.c:63:        r->coeffs[i+1] = barrett_reduce(r->coeffs[i+1]);
+Implementations/Reference_Implementation/Lore-L4/reduce.c:64:        r->coeffs[i+2] = barrett_reduce(r->coeffs[i+2]);
+Implementations/Reference_Implementation/Lore-L4/reduce.c:65:        r->coeffs[i+3] = barrett_reduce(r->coeffs[i+3]);

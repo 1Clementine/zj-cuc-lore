@@ -1,0 +1,4 @@
+version,impl,level,op,iterations,warmup,total_ns,avg_ns,ops_per_sec,failures
+SHAKE,Reference,L4,keypair,10000,1000,4204008245,420400.82,2378.68,2914,3170,11672,32,0
+SHAKE,Reference,L4,encaps,10000,1000,5236520973,523652.10,1909.66,2914,3170,11672,32,0
+SHAKE,Reference,L4,decaps,10000,1000,7007701659,700770.17,1427.00,2914,3170,11672,32,0

@@ -109,14 +109,14 @@ CSV: `report/performance/lore_shake_vs_liboqs_mlkem_reference_generic.csv`
 
 ## 8. Conclusion for Paper Update
 
-1. **Previous SHAKE performance numbers were unreliable** — the old `fips202.c` was not pure SHAKE but an SM3/pseudoXOF wrapper, which artificially inflated cycle counts.
-2. **Replacement with pure Keccak/SHAKE FIPS202 improves performance 1.37x–2.68x** depending on level and operation. L4 benefits most (2.68x for keypair).
-3. **New KAT passed on all L1-L4.**
-4. **liboqs ML-KEM Reference benchmarked** on the same platform, same generic compilation profile (no native/AVX2/SIMD).
+1. **Previous SHAKE performance was invalid** — the old `fips202.c` was not pure SHAKE but an SM3/pseudoXOF wrapper, artificially inflating cycle counts.
+2. **Pure Keccak/SHAKE FIPS202 restored.** SHAKE L4 KAT passed.
+3. **SM3 Reference L4 is 1.89x–2.65x slower than pure SHAKE Reference L4** — SM3 pseudoXOF overhead is significant.
+4. **ML-KEM-1024 Reference is ~3x–6x faster than Lore-SHAKE L4 Reference** on the same generic/reference benchmark setting.
 5. **Paper data should use:**
-   - `report/performance/shake_reference_after_pure_fips202_generic.csv` for Lore SHAKE Reference
+   - `report/performance/shake_256_reference_after_pure_fips202_generic.csv` for Lore SHAKE L4
    - `report/performance/liboqs_mlkem_reference_generic.csv` for ML-KEM Reference
-6. **Lore SHAKE Reference generic is about 3–5× slower than ML-KEM Reference generic** on comparable security levels — consistent with Lore using larger key/ciphertext sizes and different arithmetic.
+6. **Current branch is 256-bit only (Lore-L4).** L1-L3 are archived; L4 is the validated stable SHAKE baseline.
 
 ## 9. SHAKE Pure vs SM3 Reference
 
