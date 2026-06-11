@@ -1,75 +1,19 @@
-# Lore SM3 Report
+# Lore-SM3 Benchmark Summary
 
-This report summarizes the official-submission-aligned SM3 version.
+## Scope
 
-## Branch Role
-
-- Branch: `SM3`
-- Role: official-submission-aligned implementation
-- Fixed hash: `sm3hash(256, ...)`
-- Variable-length XOF/KDF: `pseudoXOF(...)`
-- DRNG: official `drng.c/h`
-- KAT: official `KAT_KEM.c` and `KEM_AlgorithmInstance.c/h`
-
-The SHAKE256 branch is retained only as a comparison / legacy branch.
+Measures KEM API performance: `crypto_kem_keypair` / `crypto_kem_enc` / `crypto_kem_dec`.
+Reports CPU cycles + wall-clock time. Generic build, `-O3 -DNDEBUG`, 10000 iters, 1000 warmup.
 
 ## Files
 
-| Path | Description |
-|---|---|
-| `VALIDATION_REPORT.md` | Full validation report |
-| `FINAL_SIZE_TABLE.md` | Actual serialized size statistics |
-| `performance/perf_generic.csv` | Generic baseline performance |
-| `performance/perf_native_avx2.csv` | Native / AVX2 performance |
-| `run_performance.sh` | One-click performance test |
-| `performance_tests/` | Benchmark source and helper scripts |
-| `../Test_Vectors/` | Official-driver-generated KAT vectors |
+- `bench/run_full_lore_sm3_kem_bench.sh` — full benchmark entry
+- `report/SM3_KEM_ALL_LEVELS_PERFORMANCE.md` — results summary
+- `report/performance/lore_sm3_kem_cycles_time_all_levels.csv` — raw CSV
+- `report/performance_tests/bench_lore_sm3_kem_cycles_time.c` — benchmark source
 
-## Main Status
-
-| Check | Status |
-|---|---|
-| Official auxfunc alignment | PASS |
-| Official KAT/API alignment | PASS |
-| Reference pure C | PASS |
-| Optimized AVX2 backend | PASS |
-| Ref/Opt L1-L4 KAT | PASS |
-| Ref/Opt vectors bit-identical | PASS |
-| Performance tests | PASS |
-| Size analysis | PASS with L4 CT caveat |
-
-## Known Caveat
-
-L4 ciphertext actual size differs from the paper table:
-
-- measured actual average: 2882.68 bytes
-- paper value: 2886 bytes
-
-This is documented in `FINAL_SIZE_TABLE.md`.
-
-## Re-run Performance
-
-Generic baseline:
+## Run
 
 ```bash
-cd /home/syh/Work/zj-cuc-lore-sm3/report
-MODE=generic bash run_performance.sh 10000 1000
-```
-
-Native / AVX2:
-
-```bash
-MODE=native bash run_performance.sh 10000 1000
-```
-
-## Re-run KAT
-
-```bash
-cd /home/syh/Work/zj-cuc-lore-sm3
-for impl in Reference_Implementation Optimized_Implementation; do
-  for lvl in 1 2 3 4; do
-    d="Implementations/$impl/Lore-L${lvl}"
-    (cd "$d" && make clean && make KAT_KEM_${lvl} && ./KAT_KEM_${lvl})
-  done
-done
+bash bench/run_full_lore_sm3_kem_bench.sh
 ```

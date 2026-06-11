@@ -1,0 +1,9 @@
+
+bench/results/
+*.o
+*.a
+*.so
+build/
+*/build/
+*/output/
+bench_lore_sm3_kem_cycles_time
