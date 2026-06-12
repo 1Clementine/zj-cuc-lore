@@ -1,4 +1,0 @@
-scheme,level,paper_name,classical_security,operation,iterations,warmup,avg_cycles,median_cycles,avg_us,median_us,pk_bytes,ct_bytes,sk_bytes,kappa,n,k,t,pure_shake,opt_status,failures
-Lore-SHAKE,L2,Lore-256,256-bit,kem_keygen,10000,1000,248995,246878,86.09,85.36,1186,1282,4518,256,512,2,2,YES,AB_inline,0
-Lore-SHAKE,L2,Lore-256,256-bit,kem_encaps,10000,1000,355390,354606,122.88,122.61,1186,1282,4518,256,512,2,2,YES,AB_inline,0
-Lore-SHAKE,L2,Lore-256,256-bit,kem_decaps,10000,1000,434512,433966,150.23,150.04,1186,1282,4518,256,512,2,2,YES,AB_inline,0
