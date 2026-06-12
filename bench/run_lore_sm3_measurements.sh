@@ -5,7 +5,9 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="${1:-usage}"
 
 # Defaults (override via environment)
-LEVELS="${LEVELS:-1 2 3 4}"
+LEVELS="${LEVELS:-L1 L2 L3 L4}"
+# Strip L prefix for internal use
+LEVELS=$(echo "$LEVELS" | sed "s/\\<L\([0-9]\)\\>/\1/g")
 TRIALS="${TRIALS:-10000}"
 ITERS="${ITERS:-10000}"
 WARMUP="${WARMUP:-1000}"
