@@ -6,8 +6,7 @@ MODE="${1:-usage}"
 
 # Defaults (override via environment)
 LEVELS="${LEVELS:-L1 L2 L3 L4}"
-# Strip L prefix for internal use
-LEVELS=$(echo "$LEVELS" | sed "s/\\<L\([0-9]\)\\>/\1/g")
+LEVELS="$(echo $LEVELS | tr -d L)"
 TRIALS="${TRIALS:-10000}"
 ITERS="${ITERS:-10000}"
 WARMUP="${WARMUP:-1000}"
@@ -53,6 +52,7 @@ run_size() {
             2) PDF_PK=$PDF_PK_L2; PDF_CT=$PDF_CT_L2; PDF_SK=$PDF_SK_L2;;
             3) PDF_PK=$PDF_PK_L3; PDF_CT=$PDF_CT_L3; PDF_SK=$PDF_SK_L3;;
             3) PDF_PK=$PDF_PK_L3; PDF_CT=$PDF_CT_L3; PDF_SK=$PDF_SK_L3;;
+            3) PDF_PK=$PDF_PK_L3; PDF_CT=$PDF_CT_L3; PDF_SK=$PDF_SK_L3;;
             4) PDF_PK=$PDF_PK_L4; PDF_CT=$PDF_CT_L4; PDF_SK=$PDF_SK_L4;;
         esac
 
@@ -76,7 +76,7 @@ run_cycles() {
     mkdir -p "$OUTDIR"
 
     local CSV="$OUTDIR/lore_sm3_kem_api_cycles.csv"
-    echo "scheme,level,paper_name,classical_security,implementation,operation,iterations,warmup,avg_cycles,median_cycles,avg_us,median_us,pk_bytes,ct_bytes,sk_bytes,ss_bytes,kappa,n,k,t,backend,opt_status,failures" > "$CSV"
+    echo "scheme,level,paper_name,classical_security,operation,iterations,warmup,avg_cycles,median_cycles,avg_us,median_us,pk_bytes,ct_bytes,sk_bytes,ss_bytes,kappa,n,k,t,backend,opt_status,failures" > "$CSV"
 
     # Generate architecture-aware benchmark source (always regenerate)
     local BENCH_SRC="$REPO/bench/.bench_kem_cycles_time.c"
@@ -199,7 +199,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_keygen,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_keygen,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
@@ -221,7 +221,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_encaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_encaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
@@ -245,7 +245,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_decaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_decaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
@@ -271,22 +271,21 @@ BENCHSRC
         if gcc -O3 -DNDEBUG -std=gnu11 -D_POSIX_C_SOURCE=199309L \
             -DWARMUP_VAL=${WARMUP} -DITERS_VAL=${ITERS} \
             -I. -DLORE_LEVEL=${L} \
-            "$BENCH_SRC" $SRC -o "$BIN" -lm 2>"$OUTDIR/bench_ref_L${L}.log"; then
+            "$BENCH_SRC" $SRC -o "$BIN" -lm 2>"$OUTDIR/bench_L${L}.log"; then
             local RUN="$BIN"
             [ -n "$CORE" ] && [ "$CORE" != "0" ] && RUN="taskset -c $CORE $BIN"
 
-            local RAW="$OUTDIR/bench_ref_L${L}.txt"
+            local RAW="$OUTDIR/bench_L${L}.txt"
             if $RUN > "$RAW" 2>> "$RAW"; then
-                cat "$RAW"
+                cat "$RAW"                    # terminal display
                 grep "^Lore-SM3" "$RAW" >> "$CSV"
                 echo "  Done."
             else
                 cat "$RAW" || true
-                echo "  [ERROR] benchmark failed for ref L${L}. See $RAW"
+                echo "  [ERROR] benchmark failed for L${L}. See $RAW"
             fi
-            echo "  Done."
         else
-            echo "  [ERROR] compile failed for L${L}. See $OUTDIR/bench_ref_L${L}.log"
+            echo "  [ERROR] compile failed for L${L}. See $OUTDIR/bench_L${L}.log"
         fi
     done
     echo "Output: $OUTDIR"

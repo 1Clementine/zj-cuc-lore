@@ -115,7 +115,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_keygen,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_keygen,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
@@ -137,7 +137,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_encaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_encaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
@@ -161,7 +161,7 @@ int main(void) {
         qsort(cb, N, sizeof(unsigned long long), u64cmp);
         qsort(tb, N, sizeof(long long), s64cmp);
         ac /= N; an /= N;
-        printf("Lore-SM3,ref,L%d,Lore-%d,%d-bit,ref,kem_decaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
+        printf("Lore-SM3,L%d,Lore-%d,%d-bit,kem_decaps,%d,%d,%llu,%llu,%.2f,%.2f,%zu,%zu,%zu,%zu,%d,%d,%d,%d,SM3,AB_inline,%d\n",
             LORE_LEVEL, LORE_KAPPA, LORE_KAPPA, N, W, ac, cb[N/2],
             an / 1000.0, tb[N/2] / 1000.0,
             (size_t)CRYPTO_PUBLICKEYBYTES, (size_t)CRYPTO_CIPHERTEXTBYTES,
