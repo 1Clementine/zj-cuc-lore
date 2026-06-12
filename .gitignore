@@ -9,3 +9,4 @@ build/
 bench_lore_sm3_kem_cycles_time
 bench/results/*
 !bench/results/.gitkeep
+bench/.sm3_bench_cycles.c
