@@ -1,0 +1,10 @@
+scheme,level,paper_name,classical_security,operation,iterations,warmup,avg_cycles,median_cycles,avg_us,median_us,pk_bytes,ct_bytes,sk_bytes,ss_bytes,kappa,n,k,t,pure_shake,opt_status,failures
+Lore-SHAKE,L1,Lore-128,128-bit,kem_keygen,10000,1000,87930,87828,30.41,30.38,610,706,2108,128,512,1,2,YES,AB_inline,0
+Lore-SHAKE,L1,Lore-128,128-bit,kem_encaps,10000,1000,158495,158270,54.81,54.73,610,706,2108,128,512,1,2,YES,AB_inline,0
+Lore-SHAKE,L1,Lore-128,128-bit,kem_decaps,10000,1000,211003,210528,72.97,72.81,610,706,2108,128,512,1,2,YES,AB_inline,0
+Lore-SHAKE,L2,Lore-256,256-bit,kem_keygen,10000,1000,248995,246878,86.09,85.36,1186,1282,4518,256,512,2,2,YES,AB_inline,0
+Lore-SHAKE,L2,Lore-256,256-bit,kem_encaps,10000,1000,355390,354606,122.88,122.61,1186,1282,4518,256,512,2,2,YES,AB_inline,0
+Lore-SHAKE,L2,Lore-256,256-bit,kem_decaps,10000,1000,434512,433966,150.23,150.04,1186,1282,4518,256,512,2,2,YES,AB_inline,0
+Lore-SHAKE,L4,Lore-512,512-bit,kem_keygen,10000,1000,991338,975238,342.69,337.12,2914,3170,11672,512,768,3,4,YES,AB_inline,0
+Lore-SHAKE,L4,Lore-512,512-bit,kem_encaps,10000,1000,1272289,1254270,439.80,433.56,2914,3170,11672,512,768,3,4,YES,AB_inline,0
+Lore-SHAKE,L4,Lore-512,512-bit,kem_decaps,10000,1000,1510760,1498490,522.22,517.98,2914,3170,11672,512,768,3,4,YES,AB_inline,0
