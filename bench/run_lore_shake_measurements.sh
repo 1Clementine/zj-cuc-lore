@@ -72,8 +72,9 @@ run_cycles() {
     local CSV="$OUTDIR/lore_shake_kem_api_cycles.csv"
     echo "scheme,level,paper_name,classical_security,operation,iterations,warmup,avg_cycles,median_cycles,avg_us,median_us,pk_bytes,ct_bytes,sk_bytes,ss_bytes,kappa,n,k,t,pure_shake,opt_status,failures" > "$CSV"
 
-    # Generate architecture-aware benchmark source
+    # Generate architecture-aware benchmark source (always regenerate)
     local BENCH_SRC="$REPO/bench/.bench_kem_cycles_time.c"
+    rm -f "$BENCH_SRC"
     cat > "$BENCH_SRC" << 'BENCHSRC'
 #include <stdio.h>
 #include <stdlib.h>
@@ -97,6 +98,7 @@ static inline unsigned long long cyc_rd(void) {
     __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
     return ((unsigned long long)hi << 32) | lo;
 }
+static void cyc_close(void) {}
 #elif defined(__aarch64__)
 /* ---- aarch64: perf_event_open ---- */
 #include <unistd.h>
@@ -132,10 +134,6 @@ static inline unsigned long long cyc_rd(void) {
 static void cyc_close(void) { if (perf_fd >= 0) close(perf_fd); }
 #else
 #error "Unsupported architecture for cycle counter. Only x86_64 and aarch64 are supported."
-#endif
-
-#ifndef cyc_close
-static void cyc_close(void) {}
 #endif
 
 static long long ns(void) {
