@@ -36,32 +36,6 @@ No L3 — main requested range is up to 256-bit (L1/L2 primary). L4 retained for
 - **No**: AES, SHA2, SM3, SM4 in the KEM algorithm hash/XOF path
 - **SM3 in auxfunc.c/drng.c**: KAT infrastructure DRNG only, not the KEM algorithm hash backend
 
-## Size Clarification
-
-Two different size conventions:
-
-### API sizes (KEM interface buffer sizes from `api.h`)
-
-Used only for KEM API sanity checks, not as final paper size figures.
-
-| Level | pk_api | ct_api | sk_api | ss |
-|---:|---:|---:|---:|---:|
-| L1 | 610 | 706 | 2108 | 32 |
-| L2 | 1186 | 1282 | 4518 | 32 |
-| L4 | 2914 | 3170 | 11672 | 32 |
-
-### Actual/PDF sizes (compact serialized sizes)
-
-These are the values used in paper size tables.
-
-| Level | pk_actual | ct_actual | sk_actual |
-|---:|---:|---:|---:|
-| L1 | 545 | 641 | 821 |
-| L2 | 1058 | 1153 | 1942 |
-| L4 | 2626 | 2886 | 5373 |
-
-API sizes are fixed KEM interface buffer sizes from `api.h`. Actual sizes are compact serialized sizes. Final size comparisons should use actual/PDF sizes, not API buffer sizes.
-
 ## Important
 
 This repository does **not** commit fixed cycle-count result tables. Cycle counts must be measured by the runner on the target platform using `bench/run_lore_shake_measurements.sh`.
