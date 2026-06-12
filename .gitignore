@@ -19,3 +19,4 @@ Implementations/**/test_speed_*
 bench/results/*
 !bench/results/.gitkeep
 bench_lore_shake_kem_cycles_time
+bench/.bench_kem_cycles_time.c
