@@ -26,10 +26,8 @@ TRIALS=10000 ITERS=10000 WARMUP=1000 CORE=0 ./bench/run_lore_shake_measurements.
 |---|---:|---:|---:|---:|---:|---:|
 | L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
 | L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
-| L3 | Lore-384 | 384-bit | 384 | 512 | 3 | 4 |
-| L4 | Lore-512 | 512-bit | 512 | 768 | 3 | 4 |
 
-The SHAKE version provides all four Lore parameter sets: L1, L2, L3, and L4.
+The SHAKE version provides two Lore parameter sets: L1 and L2.
 
 ## Backend
 

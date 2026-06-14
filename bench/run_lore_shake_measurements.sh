@@ -5,7 +5,7 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="${1:-usage}"
 
 # Defaults (override via environment)
-LEVELS="${LEVELS:-1 2 3 4}"
+LEVELS="${LEVELS:-1 2}"
 TRIALS="${TRIALS:-10000}"
 ITERS="${ITERS:-10000}"
 WARMUP="${WARMUP:-1000}"
@@ -15,19 +15,15 @@ CORE="${CORE:-0}"
 declare -A PAPER SEC KAPPA NN KK TT
 PAPER[1]="Lore-128";  SEC[1]="128-bit"; KAPPA[1]=128; NN[1]=512; KK[1]=1; TT[1]=2
 PAPER[2]="Lore-256";  SEC[2]="256-bit"; KAPPA[2]=256; NN[2]=512; KK[2]=2; TT[2]=2
-    PAPER[3]="Lore-384";  SEC[3]="384-bit"; KAPPA[3]=384; NN[3]=512; KK[3]=3; TT[3]=4
-PAPER[4]="Lore-512";  SEC[4]="512-bit"; KAPPA[4]=512; NN[4]=768; KK[4]=3; TT[4]=4
 
 PDF_PK_L1=545;  PDF_CT_L1=641;  PDF_SK_L1=821
 PDF_PK_L2=1058; PDF_CT_L2=1153; PDF_SK_L2=1942
-PDF_PK_L3=1763; PDF_CT_L3=1921; PDF_SK_L3=3704
-PDF_PK_L4=2626; PDF_CT_L4=2886; PDF_SK_L4=5373
 
 usage() {
     echo "Usage: $0 {size|cycles|all}"
     echo ""
-    echo "  size      Measure actual serialized sizes for L1/L2/L3/L4"
-    echo "  cycles    Run KEM API benchmark (cycles + time) for L1/L2/L3/L4"
+    echo "  size      Measure actual serialized sizes for L1/L2"
+    echo "  cycles    Run KEM API benchmark (cycles + time) for L1/L2"
     echo "  all       Run both size and cycles"
     echo ""
     echo "Overrides: TRIALS=$TRIALS ITERS=$ITERS WARMUP=$WARMUP CORE=$CORE"
@@ -47,8 +43,6 @@ run_size() {
         case $L in
             1) PDF_PK=$PDF_PK_L1; PDF_CT=$PDF_CT_L1; PDF_SK=$PDF_SK_L1;;
             2) PDF_PK=$PDF_PK_L2; PDF_CT=$PDF_CT_L2; PDF_SK=$PDF_SK_L2;;
-            3) PDF_PK=$PDF_PK_L3; PDF_CT=$PDF_CT_L3; PDF_SK=$PDF_SK_L3;;
-            4) PDF_PK=$PDF_PK_L4; PDF_CT=$PDF_CT_L4; PDF_SK=$PDF_SK_L4;;
         esac
 
         echo "===== L${L} actual sizes  ====="

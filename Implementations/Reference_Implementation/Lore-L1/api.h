@@ -8,10 +8,6 @@
 #define CRYPTO_ALGNAME "LORE-128"
 #elif (LORE_LEVEL == 2)
 #define CRYPTO_ALGNAME "LORE-256"
-#elif (LORE_LEVEL == 3)
-#define CRYPTO_ALGNAME "LORE-384"
-#elif (LORE_LEVEL == 4)
-#define CRYPTO_ALGNAME "LORE-512"
 #endif
 
 // === KEM API ===
