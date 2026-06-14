@@ -376,9 +376,7 @@ void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsig
     unsigned int buf_pos = 0; 
 
     // Direct sampling in [-(t-1)/2, (t-1)/2].
-    int16_t max_val = (t - 1) / 2;
-    int16_t min_val = -max_val;
-    uint16_t range = max_val - min_val + 1; // range=1 when t=2; range=3 when t=4.
+    uint16_t range = t;
     uint16_t limit = (uint16_t)((0x100 / range) * range);
 
     while(ctr < LORE_N) {
@@ -387,7 +385,10 @@ void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsig
         
         if (val < limit) {
             // Ensure zero mean.
-            int16_t t_coeff = (int16_t)(val % range) + min_val;
+            int16_t t_coeff = (int16_t)(val % range);
+            if (t == 4) {
+                t_coeff -= ((t_coeff >> 1) & (t_coeff & 1)) << 2;
+            }
             r->coeffs[ctr++] = t_coeff;
         }
     }
