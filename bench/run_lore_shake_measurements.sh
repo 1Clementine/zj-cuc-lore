@@ -27,6 +27,8 @@ usage() {
     echo "  all       Run both size and cycles"
     echo ""
     echo "Overrides: TRIALS=$TRIALS ITERS=$ITERS WARMUP=$WARMUP CORE=$CORE"
+    echo ""
+    echo "LEVELS accepts either numeric (1 2) or L-prefixed (L1 L2) format."
     exit 1
 }
 
@@ -39,21 +41,25 @@ run_size() {
     echo "level,type,count,min,avg,max,p5,p50,p95,pdf,avg_minus_pdf,source" > "$CSV"
 
     local PDF_PK PDF_CT PDF_SK
-    for L in $LEVELS; do
-        case $L in
+    for LEVEL in $LEVELS; do
+        local NUM="${LEVEL#L}"
+        local LABEL="L${NUM}"
+
+        case "$NUM" in
             1) PDF_PK=$PDF_PK_L1; PDF_CT=$PDF_CT_L1; PDF_SK=$PDF_SK_L1;;
             2) PDF_PK=$PDF_PK_L2; PDF_CT=$PDF_CT_L2; PDF_SK=$PDF_SK_L2;;
+            *) echo "Unsupported SHAKE level: $LEVEL. This package supports only L1/L2." >&2; exit 1;;
         esac
 
-        echo "===== L${L} actual sizes  ====="
-        :> "$OUTDIR/actual_size_L${L}.txt"  # truncate before appending
+        echo "===== $LABEL actual sizes  ====="
+        :> "$OUTDIR/actual_size_${LABEL}.txt"
 
         for pair in "pk $PDF_PK" "ct $PDF_CT" "sk $PDF_SK"; do
             local type=$(echo $pair | awk '{print $1}')
             local val=$(echo $pair | awk '{print $2}')
-            echo "$type,$val" >> "$OUTDIR/actual_size_L${L}.txt"
-            echo "L${L},$type,0,$val,$val,$val,$val,$val,$val,$val,0,PDF/specification" >> "$CSV"
-            echo "  L${L} $type=$val "
+            echo "$type,$val" >> "$OUTDIR/actual_size_${LABEL}.txt"
+            echo "$LABEL,$type,0,$val,$val,$val,$val,$val,$val,$val,0,PDF/specification" >> "$CSV"
+            echo "  $LABEL $type=$val "
         done
     done
     echo "Output: $OUTDIR"
@@ -251,30 +257,39 @@ BENCHSRC
     # KEM API source files only (no KAT/DRNG wrapper)
     local SRC="kem.c pke.c indcpa.c polyvec.c poly.c ntt.c sampler.c reduce.c symmetric-shake.c fips202.c toomcook.c verify.c bch_codec.c randombytes.c"
 
-    for L in $LEVELS; do
-        local D="$REPO/Implementations/Reference_Implementation/Lore-L${L}"
-        echo "===== Benchmark L${L} (${PAPER[$L]}) ====="
+    for LEVEL in $LEVELS; do
+        local NUM="${LEVEL#L}"
+        local LABEL="L${NUM}"
+
+        # Validate level
+        case "$NUM" in
+            1|2) ;;
+            *) echo "Unsupported SHAKE level: $LEVEL. This package supports only L1/L2." >&2; exit 1;;
+        esac
+
+        local D="$REPO/Implementations/Reference_Implementation/Lore-${LABEL}"
+        echo "===== Benchmark ${LABEL} (${PAPER[$NUM]}) ====="
         cd "$D"
 
-        local BIN="/tmp/bench_run_L${L}"
+        local BIN="/tmp/bench_run_${LABEL}"
         if gcc -O3 -DNDEBUG -std=gnu11 -D_POSIX_C_SOURCE=199309L \
             -DWARMUP_VAL=${WARMUP} -DITERS_VAL=${ITERS} \
-            -I. -DLORE_LEVEL=${L} \
-            "$BENCH_SRC" $SRC -o "$BIN" -lm 2>"$OUTDIR/bench_L${L}.log"; then
+            -I. -DLORE_LEVEL=${NUM} \
+            "$BENCH_SRC" $SRC -o "$BIN" -lm 2>"$OUTDIR/bench_${LABEL}.log"; then
             local RUN="$BIN"
             [ -n "$CORE" ] && [ "$CORE" != "0" ] && RUN="taskset -c $CORE $BIN"
 
-            local RAW="$OUTDIR/bench_L${L}.txt"
+            local RAW="$OUTDIR/bench_${LABEL}.txt"
             if $RUN > "$RAW" 2>> "$RAW"; then
                 cat "$RAW"                    # terminal display
                 grep "^Lore-SHAKE" "$RAW" >> "$CSV"
                 echo "  Done."
             else
                 cat "$RAW" || true
-                echo "  [ERROR] benchmark failed for L${L}. See $RAW"
+                echo "  [ERROR] benchmark failed for ${LABEL}. See $RAW"
             fi
         else
-            echo "  [ERROR] compile failed for L${L}. See $OUTDIR/bench_L${L}.log"
+            echo "  [ERROR] compile failed for ${LABEL}. See $OUTDIR/bench_${LABEL}.log"
         fi
     done
     echo "Output: $OUTDIR"

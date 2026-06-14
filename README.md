@@ -9,15 +9,27 @@ This repository contains Lore-SHAKE reference implementations.
 ## Quick Start
 
 ```bash
+# Default (L1 + L2):
 ./bench/run_lore_shake_measurements.sh size      # actual serialized sizes
 ./bench/run_lore_shake_measurements.sh cycles    # KEM cycles + time
 ./bench/run_lore_shake_measurements.sh all       # both
 ```
 
-Parameters:
+Recommended full benchmark:
 
 ```bash
-TRIALS=10000 ITERS=10000 WARMUP=1000 CORE=0 ./bench/run_lore_shake_measurements.sh all
+LEVELS="1 2" \
+TRIALS=10000 \
+ITERS=10000 \
+WARMUP=1000 \
+CORE=0 \
+./bench/run_lore_shake_measurements.sh all
+```
+
+LEVELS also accepts `L1 L2` format:
+
+```bash
+LEVELS="L1 L2" TRIALS=10000 ITERS=10000 ./bench/run_lore_shake_measurements.sh all
 ```
 
 ## Included Levels
