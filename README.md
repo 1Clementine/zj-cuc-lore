@@ -1,100 +1,114 @@
-# Lore-SHAKE Reference Implementation
+# Lore KEM Implementations
 
-This repository contains the Lore-SHAKE reference implementation (L1 and L2 only).
+This repository combines the Lore KEM SHAKE and SM3 implementation branches in a backend-separated layout.
 
+- SHAKE backend: L1 and L2.
+- SM3 backend: L1, L2, L3, and L4.
 - Formal implementation files: `Implementations/`
 - KAT files: `Test_Vectors/`
-- Benchmark and size measurement: `bench/`
+- Benchmark and size measurement scripts: `bench/`
 
 ## Quick Start
 
+Run measurements through the unified wrapper:
+
 ```bash
-# Default (L1 + L2):
-./bench/run_lore_shake_measurements.sh size      # actual serialized sizes
-./bench/run_lore_shake_measurements.sh cycles    # KEM cycles + time
-./bench/run_lore_shake_measurements.sh all       # both
+./bench/run_lore_measurements.sh shake size
+./bench/run_lore_measurements.sh shake cycles
+./bench/run_lore_measurements.sh sm3 size
+./bench/run_lore_measurements.sh sm3 cycles
 ```
 
-Recommended full benchmark:
+Backend-specific scripts are also kept:
 
 ```bash
-LEVELS="1 2" \
+./bench/run_lore_shake_measurements.sh all
+./bench/run_lore_sm3_measurements.sh all
+```
+
+Recommended full benchmark examples:
+
+```bash
+LEVELS="L1 L2" \
 TRIALS=10000 \
 ITERS=10000 \
 WARMUP=1000 \
 CORE=0 \
-./bench/run_lore_shake_measurements.sh all
-```
+./bench/run_lore_measurements.sh shake all
 
-LEVELS also accepts `L1 L2` format:
-
-```bash
-LEVELS="L1 L2" TRIALS=10000 ITERS=10000 ./bench/run_lore_shake_measurements.sh all
+LEVELS="L1 L2 L3 L4" \
+TRIALS=10000 \
+ITERS=10000 \
+WARMUP=1000 \
+CORE=0 \
+./bench/run_lore_measurements.sh sm3 all
 ```
 
 ## Included Levels
 
-| Level | Paper Name | Security | KAPPA | N | K | t |
-|---|---:|---:|---:|---:|---:|---:|
-| L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
-| L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
-
-The SHAKE version provides two Lore parameter sets: L1 and L2.
+| Backend | Level | Paper Name | Security | KAPPA | N | K | t |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| SHAKE | L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
+| SHAKE | L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
+| SM3 | L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
+| SM3 | L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
+| SM3 | L3 | Lore-384 | 384-bit | 384 | 512 | 3 | 4 |
+| SM3 | L4 | Lore-512 | 512-bit | 512 | 768 | 3 | 4 |
 
 ## Directory Structure
 
-```
-Reference_Implementation/
-    Platform-independent reference implementation of Lore.
-    Each algorithm instance is placed in an individual subdirectory.
+```text
+Implementations/
+    Reference_Implementation/
+        SHAKE/
+            Lore-L1/
+            Lore-L2/
+        SM3/
+            Lore-L1/
+            Lore-L2/
+            Lore-L3/
+            Lore-L4/
+    Optimized_Implementation/
+        SHAKE/
+            Lore-L1/
+            Lore-L2/
+        SM3/
+            Lore-L1/
+            Lore-L2/
+            Lore-L3/
+            Lore-L4/
 
-    Lore-L1/
-        Reference implementation of the Lore-L1 KEM instance.
-
-    Lore-L2/
-        Reference implementation of the Lore-L2 KEM instance.
-
-Optimized_Implementation/
-    Reserved for optimized implementation variants.
-    No optimized implementation is included in the current SHAKE package.
-
-Additional_Implementation/
-    Reserved for additional software or hardware implementation variants.
-    No additional implementation is included in the current submission.
+Test_Vectors/
+    SHAKE/
+        KAT_KEM_Lore-L1.txt
+        KAT_KEM_Lore-L2.txt
+    SM3/
+        KAT_KEM_Lore-L1.txt
+        KAT_KEM_Lore-L2.txt
+        KAT_KEM_Lore-L3.txt
+        KAT_KEM_Lore-L4.txt
 ```
 
 ## Main Files in Each Algorithm Instance
 
-**KEM_AlgorithmInstance.c**
-: API_PKC bridge layer for the submitted KEM instance. It maps the Lore key generation, encapsulation and decapsulation routines to the API_PKC KEM interface.
+`KEM_AlgorithmInstance.c` and `KEM_AlgorithmInstance.h` provide the API_PKC bridge layer for KEM key generation, encapsulation, and decapsulation.
 
-**KEM_AlgorithmInstance.h**
-: Algorithm instance configuration and API_PKC function declarations.
+`KAT_KEM.c` is the API_PKC KAT generation program.
 
-**KAT_KEM.c**
-: API_PKC-provided KAT generation program for KEM schemes.
+`drng.c` and `drng.h` provide the deterministic random number generator used by KAT programs.
 
-**drng.c / drng.h**
-: API_PKC-provided deterministic random number generator used by the KAT program.
+`auxfunc.c` and `auxfunc.h` provide API_PKC auxiliary hash/XOF functions.
 
-**auxfunc.c / auxfunc.h**
-: API_PKC-provided auxiliary hash/XOF functions.
+`fips202.c`, `fips202.h`, `symmetric-shake.c`, and `symmetric.h` adapt the backend hash/XOF interface used by Lore. SM3 instances additionally include `sm3.c` and `sm3.h`.
 
-**fips202.c / fips202.h**
-: Compatibility wrapper for the SHAKE/FIPS202-style interfaces used by the Lore source code. In this submission package, the wrapper routes the internal hash/XOF operations to the API_PKC auxiliary functions `pseudohash()` and `pseudoXOF()` from `auxfunc.c`.
-
-**symmetric-shake.c / symmetric.h**
-: Symmetric primitive adapter used by Lore. The SHAKE-style calls are routed through `fips202.c` and therefore use the API_PKC auxiliary functions.
-
-**Makefile**
-: Automated build script for compiling the API_PKC KAT generator.
+`kem.c`, `pke.c`, `indcpa.c`, `poly.c`, `polyvec.c`, `ntt.c`, `sampler.c`, `reduce.c`, `toomcook.c`, `verify.c`, and `bch_codec.c` contain the core Lore implementation.
 
 ## Build / Run Examples
 
-Reference implementation:
+Reference SHAKE:
 
 ```bash
-cd Implementations/Reference_Implementation/Lore-L1
+cd Implementations/Reference_Implementation/SHAKE/Lore-L1
 make clean
 make KAT_KEM_1
 ./KAT_KEM_1
@@ -105,32 +119,41 @@ make KAT_KEM_2
 ./KAT_KEM_2
 ```
 
-Optimized implementation (L2 AVX2, ~20% faster than Ref):
+Reference SM3:
 
 ```bash
-cd Implementations/Optimized_Implementation/Lore-L2
+cd Implementations/Reference_Implementation/SM3/Lore-L1
+make clean
+make KAT_KEM_1
+./KAT_KEM_1
+
+cd ../Lore-L4
+make clean
+make KAT_KEM_4
+./KAT_KEM_4
+```
+
+Optimized examples:
+
+```bash
+cd Implementations/Optimized_Implementation/SHAKE/Lore-L2
+make clean
+make KAT_KEM_2
+./KAT_KEM_2
+
+cd ../../SM3/Lore-L2
 make clean
 make KAT_KEM_2
 ./KAT_KEM_2
 ```
 
-The optimized build accelerates `poly_mul_ntt` via AVX2 8-lane Montgomery reduction and basemul4 convolution kernel.
-
 ## Test Vectors
 
-The final KAT files are stored in the top-level `Test_Vectors/` directory:
+KAT files are stored under backend-specific directories in `Test_Vectors/`.
 
-```
-KAT_KEM_Lore-L1.txt
-KAT_KEM_Lore-L2.txt
-```
+Cycle-count result tables are intentionally not committed. Measure cycles on the target platform with `bench/run_lore_measurements.sh`.
 
-## Backend
+## Notes
 
-- **KEM hash/XOF**: Pure Keccak/SHAKE FIPS202 (`fips202.c` + `symmetric-shake.c`)
-- **No**: AES, SHA2, SM3, SM4 in the KEM algorithm hash/XOF path
-- **SM3 in auxfunc.c/drng.c**: KAT infrastructure DRNG only, not the KEM algorithm hash backend
-
-## Important
-
-This repository does **not** commit fixed cycle-count result tables. Cycle counts must be measured by the runner on the target platform using `bench/run_lore_shake_measurements.sh`.
+- Generated binaries such as `KAT_KEM_*`, object files, `obj/`, `output/`, generated benchmark sources, and benchmark result files are ignored by `.gitignore`.
+- SHAKE and SM3 sources are intentionally separated by backend to avoid mixing files with the same names but different hash/XOF behavior.

@@ -14,9 +14,10 @@ Implementations/**/test_lore_*
 Implementations/**/test_speed_*
 
 # Temporary files
+.DS_Store
 *.tmp
 *.bak
 bench/results/*
 !bench/results/.gitkeep
-bench_lore_shake_kem_cycles_time
+bench_lore_*_kem_cycles_time
 bench/.bench_kem_cycles_time.c

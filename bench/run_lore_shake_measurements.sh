@@ -12,9 +12,13 @@ WARMUP="${WARMUP:-1000}"
 CORE="${CORE:-0}"
 
 # Paper params lookup
-declare -A PAPER SEC KAPPA NN KK TT
-PAPER[1]="Lore-128";  SEC[1]="128-bit"; KAPPA[1]=128; NN[1]=512; KK[1]=1; TT[1]=2
-PAPER[2]="Lore-256";  SEC[2]="256-bit"; KAPPA[2]=256; NN[2]=512; KK[2]=2; TT[2]=2
+paper_name() {
+    case "$1" in
+        1) printf '%s\n' "Lore-128";;
+        2) printf '%s\n' "Lore-256";;
+        *) printf '%s\n' "Unknown";;
+    esac
+}
 
 PDF_PK_L1=545;  PDF_CT_L1=641;  PDF_SK_L1=821
 PDF_PK_L2=1058; PDF_CT_L2=1153; PDF_SK_L2=1942
@@ -267,8 +271,8 @@ BENCHSRC
             *) echo "Unsupported SHAKE level: $LEVEL. This package supports only L1/L2." >&2; exit 1;;
         esac
 
-        local D="$REPO/Implementations/Reference_Implementation/Lore-${LABEL}"
-        echo "===== Benchmark ${LABEL} (${PAPER[$NUM]}) ====="
+        local D="$REPO/Implementations/Reference_Implementation/SHAKE/Lore-${LABEL}"
+        echo "===== Benchmark ${LABEL} ($(paper_name "$NUM")) ====="
         cd "$D"
 
         local BIN="/tmp/bench_run_${LABEL}"
