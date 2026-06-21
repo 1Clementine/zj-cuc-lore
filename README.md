@@ -105,6 +105,17 @@ make KAT_KEM_2
 ./KAT_KEM_2
 ```
 
+Optimized implementation (L2 AVX2, ~20% faster than Ref):
+
+```bash
+cd Implementations/Optimized_Implementation/Lore-L2
+make clean
+make KAT_KEM_2
+./KAT_KEM_2
+```
+
+The optimized build accelerates `poly_mul_ntt` via AVX2 8-lane Montgomery reduction and basemul4 convolution kernel.
+
 ## Test Vectors
 
 The final KAT files are stored in the top-level `Test_Vectors/` directory:
