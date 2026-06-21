@@ -24,9 +24,6 @@ int16_t zetas[128] = {
       83,   -43,   -85,    75,   107,    87,   -91,   -86,
 };
 
-int16_t fqmul(int16_t a, int16_t b) {
-  return (int16_t)montgomery_reduce((int64_t)a * b);
-}
 
 #if LORE_N == 512
 
