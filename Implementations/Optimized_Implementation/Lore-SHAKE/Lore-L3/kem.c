@@ -110,8 +110,6 @@ int crypto_kem_enc_derand(unsigned char *ct, unsigned char *ss, const unsigned c
     hash_h(buf, coins, LORE_MSG_BYTES);
     hash_h(buf + LORE_SYMBYTES, pk, LORE_PUBLICKEYBYTES);
     hash_g(kr, buf, 2 * LORE_SYMBYTES);
-
-    // modi
     memset(ct, 0, LORE_CIPHERTEXTBYTES);
 
     indcpa_enc(ct, coins, pk, kr + LORE_SYMBYTES);
@@ -188,8 +186,6 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     hash_h(buf, mu, LORE_MSG_BYTES);
     memcpy(buf + LORE_SYMBYTES, pkh, LORE_SYMBYTES);
     hash_g(kr, buf, 2 * LORE_SYMBYTES);
-
-    // modi
     memset(ct_cmp, 0, LORE_CIPHERTEXTBYTES);
 
     indcpa_enc(ct_cmp, mu, pk, kr + LORE_SYMBYTES);
