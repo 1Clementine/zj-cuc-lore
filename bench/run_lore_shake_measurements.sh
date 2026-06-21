@@ -5,7 +5,7 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="${1:-usage}"
 
 # Defaults (override via environment)
-LEVELS="${LEVELS:-1 2}"
+LEVELS="${LEVELS:-1 2 3 4}"
 TRIALS="${TRIALS:-10000}"
 ITERS="${ITERS:-10000}"
 WARMUP="${WARMUP:-1000}"
@@ -16,23 +16,27 @@ paper_name() {
     case "$1" in
         1) printf '%s\n' "Lore-128";;
         2) printf '%s\n' "Lore-256";;
+        3) printf '%s\n' "Lore-384";;
+        4) printf '%s\n' "Lore-512";;
         *) printf '%s\n' "Unknown";;
     esac
 }
 
 PDF_PK_L1=545;  PDF_CT_L1=641;  PDF_SK_L1=821
 PDF_PK_L2=1058; PDF_CT_L2=1153; PDF_SK_L2=1942
+PDF_PK_L3=1763; PDF_CT_L3=1921; PDF_SK_L3=3704
+PDF_PK_L4=2626; PDF_CT_L4=2886; PDF_SK_L4=5373
 
 usage() {
     echo "Usage: $0 {size|cycles|all}"
     echo ""
-    echo "  size      Measure actual serialized sizes for L1/L2"
-    echo "  cycles    Run KEM API benchmark (cycles + time) for L1/L2"
+    echo "  size      Measure actual serialized sizes for L1/L2/L3/L4"
+    echo "  cycles    Run KEM API benchmark (cycles + time) for L1/L2/L3/L4"
     echo "  all       Run both size and cycles"
     echo ""
     echo "Overrides: TRIALS=$TRIALS ITERS=$ITERS WARMUP=$WARMUP CORE=$CORE"
     echo ""
-    echo "LEVELS accepts either numeric (1 2) or L-prefixed (L1 L2) format."
+    echo "LEVELS accepts either numeric (1 2 3 4) or L-prefixed (L1 L2 L3 L4) format."
     exit 1
 }
 
@@ -52,7 +56,9 @@ run_size() {
         case "$NUM" in
             1) PDF_PK=$PDF_PK_L1; PDF_CT=$PDF_CT_L1; PDF_SK=$PDF_SK_L1;;
             2) PDF_PK=$PDF_PK_L2; PDF_CT=$PDF_CT_L2; PDF_SK=$PDF_SK_L2;;
-            *) echo "Unsupported SHAKE level: $LEVEL. This package supports only L1/L2." >&2; exit 1;;
+            3) PDF_PK=$PDF_PK_L3; PDF_CT=$PDF_CT_L3; PDF_SK=$PDF_SK_L3;;
+            4) PDF_PK=$PDF_PK_L4; PDF_CT=$PDF_CT_L4; PDF_SK=$PDF_SK_L4;;
+            *) echo "Unsupported SHAKE level: $LEVEL. This package supports L1/L2/L3/L4." >&2; exit 1;;
         esac
 
         echo "===== $LABEL actual sizes  ====="
@@ -267,8 +273,8 @@ BENCHSRC
 
         # Validate level
         case "$NUM" in
-            1|2) ;;
-            *) echo "Unsupported SHAKE level: $LEVEL. This package supports only L1/L2." >&2; exit 1;;
+            1|2|3|4) ;;
+            *) echo "Unsupported SHAKE level: $LEVEL. This package supports L1/L2/L3/L4." >&2; exit 1;;
         esac
 
         local D="$REPO/Implementations/Reference_Implementation/SHAKE/Lore-${LABEL}"

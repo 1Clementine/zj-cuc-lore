@@ -2,7 +2,7 @@
 
 This repository combines the Lore KEM SHAKE and SM3 implementation branches in a backend-separated layout.
 
-- SHAKE backend: L1 and L2.
+- SHAKE backend: L1, L2, L3, and L4.
 - SM3 backend: L1, L2, L3, and L4.
 - Formal implementation files: `Implementations/`
 - KAT files: `Test_Vectors/`
@@ -29,7 +29,7 @@ Backend-specific scripts are also kept:
 Recommended full benchmark examples:
 
 ```bash
-LEVELS="L1 L2" \
+LEVELS="L1 L2 L3 L4" \
 TRIALS=10000 \
 ITERS=10000 \
 WARMUP=1000 \
@@ -50,6 +50,8 @@ CORE=0 \
 |---|---:|---:|---:|---:|---:|---:|---:|
 | SHAKE | L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
 | SHAKE | L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
+| SHAKE | L3 | Lore-384 | 384-bit | 384 | 512 | 3 | 4 |
+| SHAKE | L4 | Lore-512 | 512-bit | 512 | 768 | 3 | 4 |
 | SM3 | L1 | Lore-128 | 128-bit | 128 | 512 | 1 | 2 |
 | SM3 | L2 | Lore-256 | 256-bit | 256 | 512 | 2 | 2 |
 | SM3 | L3 | Lore-384 | 384-bit | 384 | 512 | 3 | 4 |
@@ -63,6 +65,8 @@ Implementations/
         SHAKE/
             Lore-L1/
             Lore-L2/
+            Lore-L3/
+            Lore-L4/
         SM3/
             Lore-L1/
             Lore-L2/
@@ -72,6 +76,8 @@ Implementations/
         SHAKE/
             Lore-L1/
             Lore-L2/
+            Lore-L3/
+            Lore-L4/
         SM3/
             Lore-L1/
             Lore-L2/
@@ -82,6 +88,8 @@ Test_Vectors/
     SHAKE/
         KAT_KEM_Lore-L1.txt
         KAT_KEM_Lore-L2.txt
+        KAT_KEM_Lore-L3.txt
+        KAT_KEM_Lore-L4.txt
     SM3/
         KAT_KEM_Lore-L1.txt
         KAT_KEM_Lore-L2.txt
@@ -117,6 +125,11 @@ cd ../Lore-L2
 make clean
 make KAT_KEM_2
 ./KAT_KEM_2
+
+cd ../Lore-L4
+make clean
+make KAT_KEM_4
+./KAT_KEM_4
 ```
 
 Reference SM3:
@@ -140,6 +153,11 @@ cd Implementations/Optimized_Implementation/SHAKE/Lore-L2
 make clean
 make KAT_KEM_2
 ./KAT_KEM_2
+
+cd ../Lore-L4
+make clean
+make KAT_KEM_4
+./KAT_KEM_4
 
 cd ../../SM3/Lore-L2
 make clean
