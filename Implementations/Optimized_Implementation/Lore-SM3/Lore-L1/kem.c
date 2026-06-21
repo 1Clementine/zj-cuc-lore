@@ -197,7 +197,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
 
     fail = verify(ct, ct_cmp, LORE_CIPHERTEXTBYTES);
 
-    // KDF(z || H(c')) for implicit rejection
+    // KDF(z || H(c)) for implicit rejection
     {
         unsigned char hash_cp[LORE_SYMBYTES];
         hash_h(hash_cp, ct, LORE_CIPHERTEXTBYTES);  // implicit rejection binds to input ct

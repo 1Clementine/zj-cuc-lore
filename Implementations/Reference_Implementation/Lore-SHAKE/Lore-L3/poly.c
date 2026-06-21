@@ -727,24 +727,8 @@ unsigned int rej_uniform_q(int16_t *r,
                            unsigned int buflen)
 {
   unsigned int ctr = 0, pos = 0;
-
-#ifdef LORE_USE_12BIT_REJ_Q
-  /* 12-bit packed rejection: each 3 bytes yields two 12-bit candidates.
-   * Accept range < 3855 = 15*257. Average ~12.75 bits per valid coefficient. */
-  while (ctr < len && pos + 3 <= buflen) {
-    uint32_t t = (uint32_t)buf[pos]
-               | ((uint32_t)buf[pos + 1] << 8)
-               | ((uint32_t)buf[pos + 2] << 16);
-    pos += 3;
-
-    uint16_t val0 = (uint16_t)(t & 0xFFF);
-    uint16_t val1 = (uint16_t)((t >> 12) & 0xFFF);
-
-    if (val0 < 3855) r[ctr++] = barrett_reduce((int16_t)val0);
-    if (ctr < len && val1 < 3855) r[ctr++] = barrett_reduce((int16_t)val1);
-  }
-#else
   uint16_t val;
+
   while(ctr < len && pos + 2 <= buflen) {
     val = (uint16_t)(buf[pos] | ((uint16_t)buf[pos+1] << 8));
     pos += 2;
@@ -753,7 +737,6 @@ unsigned int rej_uniform_q(int16_t *r,
       r[ctr++] = barrett_reduce((int16_t)val);
     }
   }
-#endif
   return ctr;
 }
 
