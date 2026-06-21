@@ -1,5 +1,5 @@
 #include "sm3_xof.h"
-#include "auxfunc.h"
+#include "sm3.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -48,10 +48,7 @@ static int tagged_xof(uint8_t *out,
         memcpy(buf + 1, in, inlen);
     }
 
-    pseudoXOF((unsigned long long)outlen * 8,
-              buf,
-              (unsigned long long)tagged_len * 8,
-              out);
+    sm3_kdf(out, outlen, buf, tagged_len);
 
     free(buf);
     return 0;
