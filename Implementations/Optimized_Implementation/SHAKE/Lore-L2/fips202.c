@@ -2,139 +2,82 @@
 
 #include <string.h>
 
-#define NROUNDS 24
+static const uint64_t keccak_round_constants[24] = {
+    0x0000000000000001ULL, 0x0000000000008082ULL,
+    0x800000000000808aULL, 0x8000000080008000ULL,
+    0x000000000000808bULL, 0x0000000080000001ULL,
+    0x8000000080008081ULL, 0x8000000000008009ULL,
+    0x000000000000008aULL, 0x0000000000000088ULL,
+    0x0000000080008009ULL, 0x000000008000000aULL,
+    0x000000008000808bULL, 0x800000000000008bULL,
+    0x8000000000008089ULL, 0x8000000000008003ULL,
+    0x8000000000008002ULL, 0x8000000000000080ULL,
+    0x000000000000800aULL, 0x800000008000000aULL,
+    0x8000000080008081ULL, 0x8000000000008080ULL,
+    0x0000000080000001ULL, 0x8000000080008008ULL
+};
 
-static uint64_t rol64(uint64_t x, unsigned int offset)
+static const unsigned int keccak_rho_offsets[25] = {
+     0,  1, 62, 28, 27,
+    36, 44,  6, 55, 20,
+     3, 10, 43, 25, 39,
+    41, 45, 15, 21,  8,
+    18,  2, 61, 56, 14
+};
+
+static uint64_t rotl64(uint64_t x, unsigned int n)
 {
-    return (x << offset) ^ (x >> (64 - offset));
+    return n == 0 ? x : ((x << n) | (x >> (64 - n)));
 }
 
-static uint64_t load64(const uint8_t x[8])
+static void keccak_permute(uint64_t a[25])
 {
-    unsigned int i;
-    uint64_t r = 0;
+    uint64_t c[5];
+    uint64_t d[5];
+    uint64_t b[25];
 
-    for (i = 0; i < 8; i++) {
-        r |= (uint64_t)x[i] << (8 * i);
-    }
+    for (unsigned int round = 0; round < 24; round++) {
+        for (unsigned int x = 0; x < 5; x++) {
+            c[x] = a[x] ^ a[x + 5] ^ a[x + 10] ^ a[x + 15] ^ a[x + 20];
+        }
 
-    return r;
-}
+        for (unsigned int x = 0; x < 5; x++) {
+            d[x] = c[(x + 4) % 5] ^ rotl64(c[(x + 1) % 5], 1);
+        }
 
-static void store64(uint8_t x[8], uint64_t u)
-{
-    unsigned int i;
+        for (unsigned int y = 0; y < 5; y++) {
+            for (unsigned int x = 0; x < 5; x++) {
+                a[x + 5 * y] ^= d[x];
+            }
+        }
 
-    for (i = 0; i < 8; i++) {
-        x[i] = (uint8_t)(u >> (8 * i));
-    }
-}
+        for (unsigned int y = 0; y < 5; y++) {
+            for (unsigned int x = 0; x < 5; x++) {
+                unsigned int src = x + 5 * y;
+                unsigned int dst = y + 5 * ((2 * x + 3 * y) % 5);
+                b[dst] = rotl64(a[src], keccak_rho_offsets[src]);
+            }
+        }
 
-static void keccakf1600(uint64_t s[25])
-{
-    static const uint64_t rc[NROUNDS] = {
-        0x0000000000000001ULL, 0x0000000000008082ULL,
-        0x800000000000808aULL, 0x8000000080008000ULL,
-        0x000000000000808bULL, 0x0000000080000001ULL,
-        0x8000000080008081ULL, 0x8000000000008009ULL,
-        0x000000000000008aULL, 0x0000000000000088ULL,
-        0x0000000080008009ULL, 0x000000008000000aULL,
-        0x000000008000808bULL, 0x800000000000008bULL,
-        0x8000000000008089ULL, 0x8000000000008003ULL,
-        0x8000000000008002ULL, 0x8000000000000080ULL,
-        0x000000000000800aULL, 0x800000008000000aULL,
-        0x8000000080008081ULL, 0x8000000000008080ULL,
-        0x0000000080000001ULL, 0x8000000080008008ULL
-    };
-    unsigned int round;
+        for (unsigned int y = 0; y < 5; y++) {
+            for (unsigned int x = 0; x < 5; x++) {
+                a[x + 5 * y] = b[x + 5 * y] ^
+                    ((~b[((x + 1) % 5) + 5 * y]) & b[((x + 2) % 5) + 5 * y]);
+            }
+        }
 
-    for (round = 0; round < NROUNDS; round++) {
-        uint64_t b[25];
-        uint64_t c[5];
-        uint64_t d[5];
-
-        c[0] = s[0] ^ s[5] ^ s[10] ^ s[15] ^ s[20];
-        c[1] = s[1] ^ s[6] ^ s[11] ^ s[16] ^ s[21];
-        c[2] = s[2] ^ s[7] ^ s[12] ^ s[17] ^ s[22];
-        c[3] = s[3] ^ s[8] ^ s[13] ^ s[18] ^ s[23];
-        c[4] = s[4] ^ s[9] ^ s[14] ^ s[19] ^ s[24];
-
-        d[0] = c[4] ^ rol64(c[1], 1);
-        d[1] = c[0] ^ rol64(c[2], 1);
-        d[2] = c[1] ^ rol64(c[3], 1);
-        d[3] = c[2] ^ rol64(c[4], 1);
-        d[4] = c[3] ^ rol64(c[0], 1);
-
-        s[0] ^= d[0];  s[5] ^= d[0];  s[10] ^= d[0]; s[15] ^= d[0]; s[20] ^= d[0];
-        s[1] ^= d[1];  s[6] ^= d[1];  s[11] ^= d[1]; s[16] ^= d[1]; s[21] ^= d[1];
-        s[2] ^= d[2];  s[7] ^= d[2];  s[12] ^= d[2]; s[17] ^= d[2]; s[22] ^= d[2];
-        s[3] ^= d[3];  s[8] ^= d[3];  s[13] ^= d[3]; s[18] ^= d[3]; s[23] ^= d[3];
-        s[4] ^= d[4];  s[9] ^= d[4];  s[14] ^= d[4]; s[19] ^= d[4]; s[24] ^= d[4];
-
-        b[0] = s[0];
-        b[1] = rol64(s[6], 44);
-        b[2] = rol64(s[12], 43);
-        b[3] = rol64(s[18], 21);
-        b[4] = rol64(s[24], 14);
-        b[5] = rol64(s[3], 28);
-        b[6] = rol64(s[9], 20);
-        b[7] = rol64(s[10], 3);
-        b[8] = rol64(s[16], 45);
-        b[9] = rol64(s[22], 61);
-        b[10] = rol64(s[1], 1);
-        b[11] = rol64(s[7], 6);
-        b[12] = rol64(s[13], 25);
-        b[13] = rol64(s[19], 8);
-        b[14] = rol64(s[20], 18);
-        b[15] = rol64(s[4], 27);
-        b[16] = rol64(s[5], 36);
-        b[17] = rol64(s[11], 10);
-        b[18] = rol64(s[17], 15);
-        b[19] = rol64(s[23], 56);
-        b[20] = rol64(s[2], 62);
-        b[21] = rol64(s[8], 55);
-        b[22] = rol64(s[14], 39);
-        b[23] = rol64(s[15], 41);
-        b[24] = rol64(s[21], 2);
-
-        s[0] = b[0] ^ ((~b[1]) & b[2]);
-        s[1] = b[1] ^ ((~b[2]) & b[3]);
-        s[2] = b[2] ^ ((~b[3]) & b[4]);
-        s[3] = b[3] ^ ((~b[4]) & b[0]);
-        s[4] = b[4] ^ ((~b[0]) & b[1]);
-        s[5] = b[5] ^ ((~b[6]) & b[7]);
-        s[6] = b[6] ^ ((~b[7]) & b[8]);
-        s[7] = b[7] ^ ((~b[8]) & b[9]);
-        s[8] = b[8] ^ ((~b[9]) & b[5]);
-        s[9] = b[9] ^ ((~b[5]) & b[6]);
-        s[10] = b[10] ^ ((~b[11]) & b[12]);
-        s[11] = b[11] ^ ((~b[12]) & b[13]);
-        s[12] = b[12] ^ ((~b[13]) & b[14]);
-        s[13] = b[13] ^ ((~b[14]) & b[10]);
-        s[14] = b[14] ^ ((~b[10]) & b[11]);
-        s[15] = b[15] ^ ((~b[16]) & b[17]);
-        s[16] = b[16] ^ ((~b[17]) & b[18]);
-        s[17] = b[17] ^ ((~b[18]) & b[19]);
-        s[18] = b[18] ^ ((~b[19]) & b[15]);
-        s[19] = b[19] ^ ((~b[15]) & b[16]);
-        s[20] = b[20] ^ ((~b[21]) & b[22]);
-        s[21] = b[21] ^ ((~b[22]) & b[23]);
-        s[22] = b[22] ^ ((~b[23]) & b[24]);
-        s[23] = b[23] ^ ((~b[24]) & b[20]);
-        s[24] = b[24] ^ ((~b[20]) & b[21]);
-
-        s[0] ^= rc[round];
+        a[0] ^= keccak_round_constants[round];
     }
 }
 
-static void xor_byte(uint64_t s[25], unsigned int pos, uint8_t b)
+static uint8_t state_get_byte(const keccak_state *state, unsigned int pos)
 {
-    s[pos >> 3] ^= (uint64_t)b << (8 * (pos & 7));
+    return (uint8_t)(state->s[pos / 8] >> (8 * (pos % 8)));
 }
 
-static uint8_t get_byte(const uint64_t s[25], unsigned int pos)
+static void state_xor_byte(keccak_state *state, unsigned int pos, uint8_t value)
 {
-    return (uint8_t)(s[pos >> 3] >> (8 * (pos & 7)));
+    state->s[pos / 8] ^= (uint64_t)value << (8 * (pos % 8));
 }
 
 static void keccak_init(keccak_state *state, unsigned int rate)
@@ -145,27 +88,16 @@ static void keccak_init(keccak_state *state, unsigned int rate)
 
 static void keccak_absorb(keccak_state *state, const uint8_t *in, size_t inlen)
 {
-    size_t i;
-
-    if (state->finalized) {
-        return;
-    }
-
-    while (state->pos == 0 && inlen >= state->rate) {
-        for (i = 0; i < state->rate / 8; i++) {
-            state->s[i] ^= load64(in + 8 * i);
-        }
-        keccakf1600(state->s);
-        in += state->rate;
-        inlen -= state->rate;
-    }
-
-    for (i = 0; i < inlen; i++) {
+    while (inlen > 0) {
         if (state->pos == state->rate) {
-            keccakf1600(state->s);
+            keccak_permute(state->s);
             state->pos = 0;
         }
-        xor_byte(state->s, state->pos++, in[i]);
+
+        state_xor_byte(state, state->pos, *in);
+        state->pos++;
+        in++;
+        inlen--;
     }
 }
 
@@ -175,41 +107,30 @@ static void keccak_finalize(keccak_state *state, uint8_t domain)
         return;
     }
 
-    if (state->pos == state->rate) {
-        keccakf1600(state->s);
-        state->pos = 0;
-    }
-
-    xor_byte(state->s, state->pos, domain);
-    xor_byte(state->s, state->rate - 1, 0x80);
-    keccakf1600(state->s);
+    state_xor_byte(state, state->pos, domain);
+    state_xor_byte(state, state->rate - 1, 0x80);
+    keccak_permute(state->s);
     state->pos = 0;
     state->finalized = 1;
 }
 
 static void keccak_squeeze(uint8_t *out, size_t outlen, keccak_state *state)
 {
-    size_t i;
-
-    while (state->pos == 0 && outlen >= state->rate) {
-        for (i = 0; i < state->rate / 8; i++) {
-            store64(out + 8 * i, state->s[i]);
-        }
-        keccakf1600(state->s);
-        out += state->rate;
-        outlen -= state->rate;
-    }
-
-    for (i = 0; i < outlen; i++) {
+    while (outlen > 0) {
         if (state->pos == state->rate) {
-            keccakf1600(state->s);
+            keccak_permute(state->s);
             state->pos = 0;
         }
-        out[i] = get_byte(state->s, state->pos++);
+
+        *out = state_get_byte(state, state->pos);
+        state->pos++;
+        out++;
+        outlen--;
     }
 }
 
-static void xof_once(uint8_t *out, size_t outlen, unsigned int rate,
+static void xof_once(uint8_t *out, size_t outlen,
+                     unsigned int rate,
                      const uint8_t *in, size_t inlen)
 {
     keccak_state state;
@@ -220,7 +141,8 @@ static void xof_once(uint8_t *out, size_t outlen, unsigned int rate,
     keccak_squeeze(out, outlen, &state);
 }
 
-static void hash_once(uint8_t *out, size_t outlen, unsigned int rate,
+static void hash_once(uint8_t *out, size_t outlen,
+                      unsigned int rate,
                       const uint8_t *in, size_t inlen)
 {
     keccak_state state;
