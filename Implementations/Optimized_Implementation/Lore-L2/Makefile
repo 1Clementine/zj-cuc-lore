@@ -21,6 +21,7 @@ CFLAGS_4 := $(CFLAGS_BASE) $(CFLAGS_AVX2) -DLORE_LEVEL=4
 
 # API_PKC KAT build:
 # force Lore's randombytes() to use drng_algorithm instead of OS entropy
+
 CFLAGS_KAT_1 := $(CFLAGS_1) -DLORE_USE_API_PKC_DRNG
 CFLAGS_KAT_2 := $(CFLAGS_2) -DLORE_USE_API_PKC_DRNG
 CFLAGS_KAT_3 := $(CFLAGS_3) -DLORE_USE_API_PKC_DRNG
@@ -54,6 +55,16 @@ SOURCES_BASE := \
 	bch_codec.c \
 	randombytes.c \
 	auxfunc.c
+
+ifeq ($(LORE_USE_AVX2_POLYMUL_NTT),1)
+SOURCES_BASE += simd/poly_mul_ntt_avx2.c
+CFLAGS_1 += -DLORE_USE_AVX2_POLYMUL_NTT
+CFLAGS_2 += -DLORE_USE_AVX2_POLYMUL_NTT
+CFLAGS_3 += -DLORE_USE_AVX2_POLYMUL_NTT
+CFLAGS_4 += -DLORE_USE_AVX2_POLYMUL_NTT
+endif
+
+
 
 # Development executables
 SOURCES_TEST_MAIN := test_lore.c
@@ -179,6 +190,9 @@ $(OBJROOT)/kat1:
 $(OBJROOT)/kat2:
 	mkdir -p $@
 
+$(OBJROOT)/kat2/simd:
+	mkdir -p $@
+
 $(OBJROOT)/kat3:
 	mkdir -p $@
 
@@ -208,8 +222,9 @@ $(OBJROOT)/lvl4/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl4
 $(OBJROOT)/kat1/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat1
 	$(CC) $(CFLAGS_KAT_1) $(CFLAGS_ARCH) $(CPPFLAGS) -c $< -o $@
 
-$(OBJROOT)/kat2/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat2
+$(OBJROOT)/kat2/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat2 $(OBJROOT)/kat2/simd
 	$(CC) $(CFLAGS_KAT_2) $(CFLAGS_ARCH) $(CPPFLAGS) -c $< -o $@
+
 
 $(OBJROOT)/kat3/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat3
 	$(CC) $(CFLAGS_KAT_3) $(CFLAGS_ARCH) $(CPPFLAGS) -c $< -o $@

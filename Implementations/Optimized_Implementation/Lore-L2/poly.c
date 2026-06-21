@@ -1,3 +1,6 @@
+#ifdef LORE_USE_AVX2_POLYMUL_NTT
+#include "simd/poly_mul_ntt_avx2.h"
+#endif
 #include <stdint.h>
 #include <stdio.h> 
 #include <string.h>
@@ -401,7 +404,11 @@ void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsig
 * Arguments:   - poly *r: pointer to the polynomial
 **************************************************/
 void poly_ntt(poly *r) {
+#ifdef LORE_USE_AVX2_NTT
+    ntt_avx2(r->coeffs);
+#else
     ntt(r->coeffs);
+#endif
     poly_reduce(r);
 }
 
@@ -413,7 +420,11 @@ void poly_ntt(poly *r) {
 * Arguments:   - poly *r: pointer to the polynomial
 **************************************************/
 void poly_invntt_tomont(poly *r) {
+#ifdef LORE_USE_AVX2_NTT
+    invntt_tomont_avx2(r->coeffs);
+#else
     invntt_tomont(r->coeffs);
+#endif
 }
 
 /*************************************************
@@ -422,7 +433,11 @@ void poly_invntt_tomont(poly *r) {
 * Description: Pointwise multiplication of two polynomials in the NTT domain.
 **************************************************/
 void poly_pointwise_montgomery(poly *r, const poly *a, const poly *b) {
+#ifdef LORE_USE_AVX2_POLYMUL_NTT
+    poly_mul_ntt_avx2(r->coeffs, a->coeffs, b->coeffs);
+#else
     poly_mul_ntt(r->coeffs, a->coeffs, b->coeffs);
+#endif
 }
 
 /*************************************************
