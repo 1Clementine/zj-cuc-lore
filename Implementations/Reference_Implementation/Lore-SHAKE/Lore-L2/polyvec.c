@@ -3,10 +3,6 @@
 #include "symmetric.h"
 #include <string.h> // for memset
 
-#ifdef LORE_USE_AVX2_HASH
-#include "simd_hash/simd_x4.h"
-#endif
-
 /*************************************************
 * Name:        polyvec_ntt
 *
@@ -230,86 +226,10 @@ void gen_matrix_ntt(poly_crt_vec a[LORE_K], const unsigned char *seed, int trans
 
   // NBLOCKS *must* be large enough to generate q_poly and t_poly in one go
   // with overwhelming probability.
+  // q needs ~514 bytes, t needs ~266. Total ~780 bytes.
+  // SHAKE128_RATE = 168. 780/168 = 4.6. We'll use 5 blocks as a safe bet.
   const unsigned int NBLOCKS = 5;
-  const size_t BUF_SIZE = NBLOCKS * SHAKE128_RATE;
-
-#ifdef LORE_USE_AVX2_HASH
-  /* ----- AVX2 x4 path for L2 (K=2, KxK=4 lanes) ----- */
-  if (LORE_K == 2) {
-    uint8_t x4_buf[4][BUF_SIZE];
-    int lane_ok[4] = {0, 0, 0, 0};
-
-    /* Phase 1: generate 4 buffers via SHAKE128 x4 */
-    gen_matrix_x4_xof(
-      x4_buf[0], x4_buf[1], x4_buf[2], x4_buf[3],
-      BUF_SIZE, seed,
-      0, 0,   0, 1,   1, 0,   1, 1);
-
-    /* Phase 2: parse each lane independently */
-    for (int lane = 0; lane < 4; lane++) {
-      unsigned int local_i = (lane >> 1) & 1;
-      unsigned int local_j = lane & 1;
-      if (transposed) { unsigned int t = local_i; local_i = local_j; local_j = t; }
-
-      uint8_t *buf = x4_buf[lane];
-
-      /* q-part and t-part both read from buf[0] (different acceptance criteria) */
-      unsigned int ctr_q = rej_uniform_q(
-        a[local_i].vec[local_j].q_poly.coeffs, LORE_N,
-        buf, BUF_SIZE);
-
-      unsigned int ctr_t = rej_uniform_t(
-        a[local_i].vec[local_j].t_poly.coeffs, LORE_N,
-        buf, BUF_SIZE);
-
-      if (ctr_q >= LORE_N && ctr_t >= LORE_N) {
-        lane_ok[lane] = 1;
-      }
-    }
-
-    /* Phase 3: fallback to scalar for any lane that failed */
-    for (int lane = 0; lane < 4; lane++) {
-      if (lane_ok[lane]) continue;
-
-      unsigned int local_i = (lane >> 1) & 1;
-      unsigned int local_j = lane & 1;
-      if (transposed) { unsigned int t = local_i; local_i = local_j; local_j = t; }
-
-      keccak_state state;
-      uint8_t buf[BUF_SIZE];
-      if (transposed) {
-        xof_absorb(&state, seed, (uint8_t)local_j, (uint8_t)local_i);
-      } else {
-        xof_absorb(&state, seed, (uint8_t)local_i, (uint8_t)local_j);
-      }
-      xof_squeezeblocks(buf, NBLOCKS, &state);
-
-      unsigned int ctr_q = rej_uniform_q(
-        a[local_i].vec[local_j].q_poly.coeffs, LORE_N,
-        buf, BUF_SIZE);
-      while (ctr_q < LORE_N) {
-        xof_squeezeblocks(buf, 1, &state);
-        ctr_q += rej_uniform_q(
-          a[local_i].vec[local_j].q_poly.coeffs + ctr_q,
-          LORE_N - ctr_q, buf, SHAKE128_RATE);
-      }
-
-      unsigned int ctr_t = rej_uniform_t(
-        a[local_i].vec[local_j].t_poly.coeffs, LORE_N,
-        buf, BUF_SIZE);
-      while (ctr_t < LORE_N) {
-        xof_squeezeblocks(buf, 1, &state);
-        ctr_t += rej_uniform_t(
-          a[local_i].vec[local_j].t_poly.coeffs + ctr_t,
-          LORE_N - ctr_t, buf, SHAKE128_RATE);
-      }
-    }
-    return;
-  }
-#endif /* LORE_USE_AVX2_HASH */
-
-  /* ----- scalar path (original) ----- */
-  uint8_t buf[BUF_SIZE];
+  uint8_t buf[NBLOCKS * SHAKE128_RATE];
   
   for (i = 0; i < LORE_K; i++) {
     for (j = 0; j < LORE_K; j++) {
