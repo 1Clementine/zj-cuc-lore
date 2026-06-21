@@ -51,8 +51,8 @@
     #define LORE_T 4
     #define LORE_L 1
     #define LORE_R_BITS 1
-    #define LORE_HWT_P1 100
-    #define LORE_HWT_M1 100
+    #define LORE_HWT_P1 90
+    #define LORE_HWT_M1 90
     #define LORE_HWT_P2 20
     #define LORE_HWT_M2 20
 #elif LORE_LEVEL == 4
@@ -64,8 +64,8 @@
     #define LORE_T 4
     #define LORE_L 1
     #define LORE_R_BITS 1
-    #define LORE_HWT_P1 150
-    #define LORE_HWT_M1 150
+    #define LORE_HWT_P1 140
+    #define LORE_HWT_M1 140
     #define LORE_HWT_P2 20
     #define LORE_HWT_M2 20
 #else
