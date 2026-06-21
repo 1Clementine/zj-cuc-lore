@@ -1,3 +1,6 @@
+#ifdef LORE_USE_AVX2_POLYMUL_NTT
+#include "simd/poly_mul_ntt_avx2.h"
+#endif
 #include <stdint.h>
 #include <stdio.h> 
 #include <string.h>
@@ -404,6 +407,11 @@ void poly_invntt_tomont(poly *r) {
 * Description: Pointwise multiplication of two polynomials in the NTT domain.
 **************************************************/
 void poly_pointwise_montgomery(poly *r, const poly *a, const poly *b) {
+#ifdef LORE_USE_AVX2_POLYMUL_NTT
+    poly_mul_ntt_avx2(r->coeffs, a->coeffs, b->coeffs);
+#else
+    poly_mul_ntt(r->coeffs, a->coeffs, b->coeffs);
+#endif
     poly_mul_ntt(r->coeffs, a->coeffs, b->coeffs);
 }
 
