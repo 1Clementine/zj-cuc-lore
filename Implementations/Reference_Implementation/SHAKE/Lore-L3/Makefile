@@ -49,9 +49,7 @@ SOURCES_BASE := \
 	toomcook.c \
 	verify.c \
 	bch_codec.c \
-	randombytes.c \
-	auxfunc.c
-
+	randombytes.c
 # Development executables
 SOURCES_TEST_MAIN := test_lore.c
 SOURCES_SPEED_MAIN := test_speed.c cpucycles.c speed_print.c

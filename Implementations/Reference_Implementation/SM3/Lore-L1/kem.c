@@ -6,7 +6,6 @@
 #include "randombytes.h"
 #include "verify.h"
 #include "params.h"
-#include "fips202.h"
 #include "sm3.h"
 
 /*************************************************

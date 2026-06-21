@@ -2,7 +2,6 @@
 #include <stdio.h> 
 #include <string.h>
 #include <stdlib.h>
-#include "fips202.h"
 #include "poly.h"
 #include "ntt.h"
 #include "randombytes.h"

@@ -66,9 +66,7 @@ SOURCES_BASE := \
 	toomcook.c \
 	verify.c \
 	bch_codec.c \
-	randombytes.c \
-	auxfunc.c
-
+	randombytes.c
 ifeq ($(LORE_USE_AVX2_HASH),1)
 SOURCES_BASE += $(SIMD_HASH_SRCS)
 endif

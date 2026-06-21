@@ -107,11 +107,4 @@
     #define LORE_INSTANCE_NAME "Lore-L2"
 #endif
 
-/*
- * Upper bound for compatibility wrappers built on auxfunc.c/h.
- * This is intentionally conservative to cover pk/sk/ct concatenation cases
- * in PRF/XOF compatibility code.
- */
-#define LORE_AUX_INPUT_MAX (LORE_KEM_SECRETKEYBYTES + LORE_PUBLICKEYBYTES + LORE_CIPHERTEXTBYTES + 256)
-
 #endif
