@@ -178,7 +178,7 @@ KAT_KEM_Lore-L4.txt
 ## Backend
 
 - **KEM hash/XOF**: SM3 (`sm3.c` + `sm3.h`) — SM3-based KDF and hash
-- **Optimized Implementation**: Partial AVX2 acceleration in `poly_reduce` and `poly_add` (`-DLORE_USE_AVX2 -mavx2`)
+- **Optimized Implementation**: Partial AVX2 acceleration in `poly_reduce` and `poly_add` (`-DLORE_USE_AVX2 -mavx2`), plus L2 `poly_mul_ntt` AVX2 kernel (`LORE_USE_AVX2_POLYMUL_NTT`, enabled by default in Opt L2 Makefile, ~5% KEM speedup vs Ref)
 
 ## Important
 

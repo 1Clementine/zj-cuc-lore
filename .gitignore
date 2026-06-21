@@ -4,8 +4,14 @@ bench/results/
 *.a
 *.so
 build/
-*/build/
-*/output/
+**/build/
+**/output/
+
+# Generated binaries (KAT, test, speed)
+Implementations/**/KAT_KEM_*
+Implementations/**/test_lore_*
+Implementations/**/test_speed_*
+
 bench_lore_sm3_kem_cycles_time
 bench/results/*
 !bench/results/.gitkeep
