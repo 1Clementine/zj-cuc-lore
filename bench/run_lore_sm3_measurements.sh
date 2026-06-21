@@ -261,7 +261,7 @@ int main(void) {
 BENCHSRC
 
     # KEM API source files only (no KAT/DRNG wrapper)
-    local SRC="kem.c pke.c indcpa.c polyvec.c poly.c ntt.c sampler.c reduce.c symmetric-shake.c fips202.c sm3.c auxfunc.c toomcook.c verify.c bch_codec.c randombytes.c"
+    local SRC="kem.c pke.c indcpa.c polyvec.c poly.c ntt.c sampler.c reduce.c symmetric-sm3.c sm3_xof.c sm3.c auxfunc.c toomcook.c verify.c bch_codec.c randombytes.c"
 
     for L in $LEVELS; do
         case "$L" in
@@ -269,7 +269,7 @@ BENCHSRC
             *) echo "Unsupported SM3 level: L${L}. This package supports L1/L2/L3/L4." >&2; exit 1;;
         esac
 
-        local D="$REPO/Implementations/Reference_Implementation/SM3/Lore-L${L}"
+        local D="$REPO/Implementations/Reference_Implementation/Lore-SM3/Lore-L${L}"
         echo "===== Benchmark L${L} ($(paper_name "$L")) ====="
         cd "$D"
 

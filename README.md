@@ -107,7 +107,7 @@ Test_Vectors/
 
 `auxfunc.c` and `auxfunc.h` provide API_PKC auxiliary hash/XOF functions.
 
-`fips202.c`, `fips202.h`, `symmetric-shake.c`, and `symmetric.h` adapt the backend hash/XOF interface used by Lore. SM3 instances additionally include `sm3.c` and `sm3.h`.
+SHAKE instances use `fips202.c`, `fips202.h`, `symmetric-shake.c`, and `symmetric.h` to adapt the backend hash/XOF interface used by Lore. SM3 instances use `sm3.c`, `sm3.h`, `sm3_xof.c`, `sm3_xof.h`, `symmetric-sm3.c`, and `symmetric.h`.
 
 `kem.c`, `pke.c`, `indcpa.c`, `poly.c`, `polyvec.c`, `ntt.c`, `sampler.c`, `reduce.c`, `toomcook.c`, `verify.c`, and `bch_codec.c` contain the core Lore implementation.
 
@@ -116,7 +116,7 @@ Test_Vectors/
 Reference SHAKE:
 
 ```bash
-cd Implementations/Reference_Implementation/SHAKE/Lore-L1
+cd Implementations/Reference_Implementation/Lore-SHAKE/Lore-L1
 make clean
 make KAT_KEM_1
 ./KAT_KEM_1
@@ -135,7 +135,7 @@ make KAT_KEM_4
 Reference SM3:
 
 ```bash
-cd Implementations/Reference_Implementation/SM3/Lore-L1
+cd Implementations/Reference_Implementation/Lore-SM3/Lore-L1
 make clean
 make KAT_KEM_1
 ./KAT_KEM_1
@@ -149,7 +149,7 @@ make KAT_KEM_4
 Optimized examples:
 
 ```bash
-cd Implementations/Optimized_Implementation/SHAKE/Lore-L2
+cd Implementations/Optimized_Implementation/Lore-SHAKE/Lore-L2
 make clean
 make KAT_KEM_2
 ./KAT_KEM_2
@@ -159,7 +159,7 @@ make clean
 make KAT_KEM_4
 ./KAT_KEM_4
 
-cd ../../SM3/Lore-L2
+cd ../../Lore-SM3/Lore-L2
 make clean
 make KAT_KEM_2
 ./KAT_KEM_2

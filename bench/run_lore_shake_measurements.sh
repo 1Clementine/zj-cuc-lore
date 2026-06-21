@@ -277,7 +277,7 @@ BENCHSRC
             *) echo "Unsupported SHAKE level: $LEVEL. This package supports L1/L2/L3/L4." >&2; exit 1;;
         esac
 
-        local D="$REPO/Implementations/Reference_Implementation/SHAKE/Lore-${LABEL}"
+        local D="$REPO/Implementations/Reference_Implementation/Lore-SHAKE/Lore-${LABEL}"
         echo "===== Benchmark ${LABEL} ($(paper_name "$NUM")) ====="
         cd "$D"
 
