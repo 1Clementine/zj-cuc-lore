@@ -227,14 +227,14 @@ void gen_matrix_ntt(poly_crt_vec a[LORE_K], const unsigned char *seed, int trans
   // NBLOCKS *must* be large enough to generate q_poly and t_poly in one go
   // with overwhelming probability.
   // q needs ~514 bytes, t needs ~266. Total ~780 bytes.
-  // SHAKE128_RATE = 168. 780/168 = 4.6. We'll use 5 blocks as a safe bet.
+  // XOF_BLOCKBYTES = 168. 780/168 = 4.6. We'll use 5 blocks as a safe bet.
   const unsigned int NBLOCKS = 5;
-  uint8_t buf[NBLOCKS * SHAKE128_RATE];
+  uint8_t buf[NBLOCKS * XOF_BLOCKBYTES];
   
   for (i = 0; i < LORE_K; i++) {
     for (j = 0; j < LORE_K; j++) {
-      keccak_state state;
-      // 1. Set SHAKE state independently for each polynomial
+      xof_state state;
+      // 1. Set XOF state independently for each polynomial
       if (transposed) {
           xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
       } else {
@@ -248,21 +248,21 @@ void gen_matrix_ntt(poly_crt_vec a[LORE_K], const unsigned char *seed, int trans
       // -- Generate q-part --
       unsigned int ctr_q = 0;
       // Note: We use the rej_uniform_q function here.
-      ctr_q = rej_uniform_q(a[i].vec[j].q_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
+      ctr_q = rej_uniform_q(a[i].vec[j].q_poly.coeffs, LORE_N, buf, NBLOCKS * XOF_BLOCKBYTES);
       // In the rare case the buffer is not enough, squeeze another block
       while(ctr_q < LORE_N) {
         xof_squeezeblocks(buf, 1, &state);
-        ctr_q += rej_uniform_q(a[i].vec[j].q_poly.coeffs + ctr_q, LORE_N - ctr_q, buf, SHAKE128_RATE);
+        ctr_q += rej_uniform_q(a[i].vec[j].q_poly.coeffs + ctr_q, LORE_N - ctr_q, buf, XOF_BLOCKBYTES);
       }
 
       // -- Generate t-part --
       unsigned int ctr_t = 0;
       // Requires the rej_uniform_t function
-      ctr_t = rej_uniform_t(a[i].vec[j].t_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
+      ctr_t = rej_uniform_t(a[i].vec[j].t_poly.coeffs, LORE_N, buf, NBLOCKS * XOF_BLOCKBYTES);
       // In the rare case the buffer is not enough, squeeze another block
       while(ctr_t < LORE_N) {
         xof_squeezeblocks(buf, 1, &state);
-        ctr_t += rej_uniform_t(a[i].vec[j].t_poly.coeffs + ctr_t, LORE_N - ctr_t, buf, SHAKE128_RATE);
+        ctr_t += rej_uniform_t(a[i].vec[j].t_poly.coeffs + ctr_t, LORE_N - ctr_t, buf, XOF_BLOCKBYTES);
       }
     }
   }

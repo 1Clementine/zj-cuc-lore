@@ -57,8 +57,8 @@ SOURCES_BASE := \
 	ntt.c \
 	sampler.c \
 	reduce.c \
-	symmetric-shake.c \
-	fips202.c \
+	symmetric-sm3.c \
+	sm3_xof.c \
 	sm3.c \
 	toomcook.c \
 	verify.c \

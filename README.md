@@ -62,35 +62,35 @@ CORE=0 \
 ```text
 Implementations/
     Reference_Implementation/
-        SHAKE/
+        Lore-SHAKE/
             Lore-L1/
             Lore-L2/
             Lore-L3/
             Lore-L4/
-        SM3/
+        Lore-SM3/
             Lore-L1/
             Lore-L2/
             Lore-L3/
             Lore-L4/
     Optimized_Implementation/
-        SHAKE/
+        Lore-SHAKE/
             Lore-L1/
             Lore-L2/
             Lore-L3/
             Lore-L4/
-        SM3/
+        Lore-SM3/
             Lore-L1/
             Lore-L2/
             Lore-L3/
             Lore-L4/
 
 Test_Vectors/
-    SHAKE/
+    Lore-SHAKE/
         KAT_KEM_Lore-L1.txt
         KAT_KEM_Lore-L2.txt
         KAT_KEM_Lore-L3.txt
         KAT_KEM_Lore-L4.txt
-    SM3/
+    Lore-SM3/
         KAT_KEM_Lore-L1.txt
         KAT_KEM_Lore-L2.txt
         KAT_KEM_Lore-L3.txt

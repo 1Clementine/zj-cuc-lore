@@ -371,7 +371,7 @@ void indcpa_keypair_derand(unsigned char *pk, unsigned char *sk, const unsigned 
     const unsigned char *seedA = buf;
     const unsigned char *noiseseed = buf + LORE_SYMBYTES;
     
-    shake256(buf, 2 * LORE_SYMBYTES, coins, LORE_SYMBYTES);
+    sm3_xof256(buf, 2 * LORE_SYMBYTES, coins, LORE_SYMBYTES);
 
     gen_matrix_ntt(a_ntt, seedA, 0);
 

@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "params.h"
-#include "fips202.h"
 // Constant-time symmetric reduction modulo M.
 // Maps x to the range [-M/2, M/2] without timing-dependent branches.
 static inline int16_t sym_mod(int32_t x, int32_t M) {
