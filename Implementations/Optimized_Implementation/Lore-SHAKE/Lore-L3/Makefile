@@ -9,6 +9,15 @@ LDFLAGS :=
 CPPFLAGS :=
 CFLAGS_BASE := -O3 -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith -fomit-frame-pointer -I.
 
+ARCH := $(shell uname -m)
+ifeq ($(filter x86_64 amd64 i386 i686,$(ARCH)),)
+LORE_USE_AVX2 ?= 0
+else
+LORE_USE_AVX2 ?= 1
+endif
+
+LORE_USE_AVX2_SHAKE ?= $(LORE_USE_AVX2)
+
 LEVELS := 1 2 3 4
 
 # Per-level flags
@@ -16,6 +25,13 @@ CFLAGS_1 := $(CFLAGS_BASE) -DLORE_LEVEL=1
 CFLAGS_2 := $(CFLAGS_BASE) -DLORE_LEVEL=2
 CFLAGS_3 := $(CFLAGS_BASE) -DLORE_LEVEL=3
 CFLAGS_4 := $(CFLAGS_BASE) -DLORE_LEVEL=4
+
+ifeq ($(LORE_USE_AVX2_SHAKE),1)
+CFLAGS_1 += -DLORE_USE_AVX2_SHAKE -mavx2
+CFLAGS_2 += -DLORE_USE_AVX2_SHAKE -mavx2
+CFLAGS_3 += -DLORE_USE_AVX2_SHAKE -mavx2
+CFLAGS_4 += -DLORE_USE_AVX2_SHAKE -mavx2
+endif
 
 # API_PKC KAT build:
 # force Lore's randombytes() to use drng_algorithm instead of OS entropy
@@ -50,6 +66,10 @@ SOURCES_BASE := \
 	verify.c \
 	bch_codec.c \
 	randombytes.c
+
+ifeq ($(LORE_USE_AVX2_SHAKE),1)
+SOURCES_BASE += simd/shake_avx2.c
+endif
 
 # Development executables
 SOURCES_TEST_MAIN := test_lore.c
@@ -186,15 +206,19 @@ $(OBJROOT)/kat4:
 # ------------------------------------------------------------------------------
 
 $(OBJROOT)/lvl1/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl1
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_1) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/lvl2/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl2
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_2) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/lvl3/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl3
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_3) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/lvl4/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl4
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_4) $(CPPFLAGS) -c $< -o $@
 
 # ------------------------------------------------------------------------------
@@ -202,15 +226,19 @@ $(OBJROOT)/lvl4/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl4
 # ------------------------------------------------------------------------------
 
 $(OBJROOT)/kat1/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat1
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_1) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/kat2/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat2
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_2) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/kat3/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat3
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_3) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/kat4/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat4
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_4) $(CPPFLAGS) -c $< -o $@
 
 # ------------------------------------------------------------------------------

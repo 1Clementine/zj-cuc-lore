@@ -9,26 +9,25 @@ LDFLAGS :=
 CPPFLAGS :=
 CFLAGS_BASE := -O3 -Wall -Wextra -Wpedantic -Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith -fomit-frame-pointer -I.
 
-# --- AVX2 SHAKE x4 hash backend (optional) ---
-SIMD_HASH_DIR := simd_hash
-SIMD_HASH_SRCS := \
-	$(SIMD_HASH_DIR)/src/shake_scalar.c \
-	$(SIMD_HASH_DIR)/src/shake_avx2.c \
-	$(SIMD_HASH_DIR)/src/shake_x4.c \
-	$(SIMD_HASH_DIR)/src/cpu_stub.c \
-	$(SIMD_HASH_DIR)/vendor/keccak4x/KeccakP-1600-times4-SIMD256.c
-
-SIMD_HASH_CFLAGS := -DLORE_USE_AVX2_HASH -mavx2 -fno-strict-aliasing
-
-ifeq ($(LORE_USE_AVX2_HASH),1)
-CFLAGS_BASE += $(SIMD_HASH_CFLAGS) -Isimd_hash/include -Isimd_hash/src -Isimd_hash/vendor/keccak4x
+ARCH := $(shell uname -m)
+ifeq ($(filter x86_64 amd64 i386 i686,$(ARCH)),)
+LORE_USE_AVX2 ?= 0
+else
+LORE_USE_AVX2 ?= 1
 endif
+
+LORE_USE_AVX2_SHAKE ?= $(LORE_USE_AVX2)
 
 LEVELS := 2
 
 # Per-level flags
 CFLAGS_1 := $(CFLAGS_BASE) -DLORE_LEVEL=1
 CFLAGS_2 := $(CFLAGS_BASE) -DLORE_LEVEL=2
+
+ifeq ($(LORE_USE_AVX2_SHAKE),1)
+CFLAGS_1 += -DLORE_USE_AVX2_SHAKE -mavx2
+CFLAGS_2 += -DLORE_USE_AVX2_SHAKE -mavx2
+endif
 
 # --- AVX2 poly_mul_ntt kernel (cross-family, L2 only) ---
 ifeq ($(LORE_USE_AVX2_POLYMUL_NTT),1)
@@ -68,8 +67,8 @@ SOURCES_BASE := \
 	bch_codec.c \
 	randombytes.c
 
-ifeq ($(LORE_USE_AVX2_HASH),1)
-SOURCES_BASE += $(SIMD_HASH_SRCS)
+ifeq ($(LORE_USE_AVX2_SHAKE),1)
+SOURCES_BASE += simd/shake_avx2.c
 endif
 
 ifeq ($(LORE_USE_AVX2_POLYMUL_NTT),1)
@@ -171,9 +170,11 @@ $(OBJROOT)/kat2:
 # ------------------------------------------------------------------------------
 
 $(OBJROOT)/lvl1/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl1
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_1) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/lvl2/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl2
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_2) $(CPPFLAGS) -c $< -o $@
 
 # ------------------------------------------------------------------------------
@@ -181,23 +182,12 @@ $(OBJROOT)/lvl2/%.o: %.c | $(OBJROOT) $(OBJROOT)/lvl2
 # ------------------------------------------------------------------------------
 
 $(OBJROOT)/kat1/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat1
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_1) $(CPPFLAGS) -c $< -o $@
 
 $(OBJROOT)/kat2/%.o: %.c | $(OBJROOT) $(OBJROOT)/kat2
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS_KAT_2) $(CPPFLAGS) -c $< -o $@
-
-ifeq ($(LORE_USE_AVX2_HASH),1)
-# SIMD hash source files — need extra include paths for internal headers
-SIMD_KAT_OBJS := $(patsubst %.c,$(OBJROOT)/kat2/%.o,$(SIMD_HASH_SRCS))
-
-$(OBJROOT)/kat2/$(SIMD_HASH_DIR)/src/%.o: $(SIMD_HASH_DIR)/src/%.c | $(OBJROOT) $(OBJROOT)/kat2
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS_KAT_2) $(CPPFLAGS) -c $< -o $@
-
-$(OBJROOT)/kat2/$(SIMD_HASH_DIR)/vendor/keccak4x/%.o: $(SIMD_HASH_DIR)/vendor/keccak4x/%.c | $(OBJROOT) $(OBJROOT)/kat2
-	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS_KAT_2) $(CPPFLAGS) -c $< -o $@
-endif
 
 ifeq ($(LORE_USE_AVX2_POLYMUL_NTT),1)
 $(OBJROOT)/kat2/simd/%.o: simd/%.c | $(OBJROOT) $(OBJROOT)/kat2

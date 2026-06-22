@@ -152,7 +152,7 @@ void poly_crt_vec_pointwise_acc_montgomery(poly_crt *r, const poly_crt_vec *a_ro
 * Pointwise multiply a matrix row of CRT polynomials (dense)
 * with a vector of CRT polynomials (sparse) and accumulate.
 * - q-part uses NTT.
-* - t-part uses SMAUG-style sparse multiplication.
+* - t-part uses sparse multiplication.
 *
 * Arguments:   - poly_crt *r:                         pointer to the output CRT polynomial
 * - const poly_crt_vec *a_row_dense:       pointer to the dense matrix row

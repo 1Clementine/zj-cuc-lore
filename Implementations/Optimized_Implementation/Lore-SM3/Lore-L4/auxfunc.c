@@ -13,6 +13,9 @@ other purposes.
 #include <string.h>
 #include <stdlib.h>
 #include "auxfunc.h"
+#ifdef LORE_USE_AVX2_SM3
+#include "simd/sm3_avx2.h"
+#endif
 
 #define L1 512
 #define L2 256
@@ -447,6 +450,12 @@ int sm3hash(int digest_len_bits, const unsigned char *msg, unsigned long long ms
 {
 	if (digest_len_bits == 256)
 	{
+#ifdef LORE_USE_AVX2_SM3
+		if (lore_sm3_hash_avx2(digest, msg, msg_len_bits) == 0)
+		{
+			return HASH_SUCCESS;
+		}
+#endif
 		sm3_bit(msg, msg_len_bits, digest);
 		return HASH_SUCCESS;
 	}
@@ -481,6 +490,12 @@ int pseudohash(int digest_len_bits, const unsigned char *msg, unsigned long long
 // GB/T 32918.4-2016 Section 5.4.3
 int pseudoXOF(unsigned long long output_len_bits, const unsigned char *msg, unsigned long long msg_len_bits, unsigned char *output)
 {
+#ifdef LORE_USE_AVX2_SM3
+	if (lore_sm3_pseudoXOF_avx2(output_len_bits, msg, msg_len_bits, output) == 0)
+	{
+		return XOF_SUCCESS;
+	}
+#endif
 	unsigned int ct = 1;
 	unsigned char *cascade_msg_ct;
 	cascade_msg_ct = (unsigned char *)malloc((msg_len_bits + 7) / 8 + 4);

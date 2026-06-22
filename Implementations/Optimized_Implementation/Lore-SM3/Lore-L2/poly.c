@@ -119,7 +119,7 @@ void poly_add_modt(poly *r, const poly *a, const poly *b) {
 *
 * Description: Multiplies a dense polynomial A with a sparse polynomial B,
 * with the result being mod (t, x^n+1).
-* (Based on a generalized implementation from SMAUG Fig. 1)
+* Dense-by-sparse multiplication used by the t-part path.
 *
 * Arguments:   - poly *r:             pointer to the output polynomial r = a_dense * b_sparse
 * - const poly *a_dense:   pointer to the dense polynomial A
@@ -403,11 +403,7 @@ void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsig
 * Arguments:   - poly *r: pointer to the polynomial
 **************************************************/
 void poly_ntt(poly *r) {
-#ifdef LORE_USE_AVX2_NTT
-    ntt_avx2(r->coeffs);
-#else
     ntt(r->coeffs);
-#endif
     poly_reduce(r);
 }
 
@@ -419,11 +415,7 @@ void poly_ntt(poly *r) {
 * Arguments:   - poly *r: pointer to the polynomial
 **************************************************/
 void poly_invntt_tomont(poly *r) {
-#ifdef LORE_USE_AVX2_NTT
-    invntt_tomont_avx2(r->coeffs);
-#else
     invntt_tomont(r->coeffs);
-#endif
 }
 
 /*************************************************

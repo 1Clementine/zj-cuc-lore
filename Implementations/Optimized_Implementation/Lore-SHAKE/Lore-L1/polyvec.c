@@ -3,6 +3,10 @@
 #include "symmetric.h"
 #include <string.h> // for memset
 
+#ifdef LORE_USE_AVX2_SHAKE
+#include "simd/shake_avx2.h"
+#endif
+
 /*************************************************
 * Name:        polyvec_ntt
 *
@@ -152,7 +156,7 @@ void poly_crt_vec_pointwise_acc_montgomery(poly_crt *r, const poly_crt_vec *a_ro
 * Pointwise multiply a matrix row of CRT polynomials (dense)
 * with a vector of CRT polynomials (sparse) and accumulate.
 * - q-part uses NTT.
-* - t-part uses SMAUG-style sparse multiplication.
+* - t-part uses sparse multiplication.
 *
 * Arguments:   - poly_crt *r:                         pointer to the output CRT polynomial
 * - const poly_crt_vec *a_row_dense:       pointer to the dense matrix row
@@ -210,6 +214,38 @@ void gen_matrix_std(poly_crt_vec a[LORE_K], const unsigned char *seed)
     gen_matrix_ntt(a, seed, 0); // Add 0 to indicate non-transposed
 }
 
+static void gen_matrix_entry_scalar(poly_crt_vec a[LORE_K],
+                                    const unsigned char *seed,
+                                    int transposed,
+                                    unsigned int i,
+                                    unsigned int j)
+{
+  const unsigned int NBLOCKS = 5;
+  const size_t BUF_SIZE = NBLOCKS * SHAKE128_RATE;
+  keccak_state state;
+  uint8_t buf[5 * SHAKE128_RATE];
+
+  if (transposed) {
+      xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
+  } else {
+      xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j);
+  }
+
+  xof_squeezeblocks(buf, NBLOCKS, &state);
+
+  unsigned int ctr_q = rej_uniform_q(a[i].vec[j].q_poly.coeffs, LORE_N, buf, BUF_SIZE);
+  while(ctr_q < LORE_N) {
+    xof_squeezeblocks(buf, 1, &state);
+    ctr_q += rej_uniform_q(a[i].vec[j].q_poly.coeffs + ctr_q, LORE_N - ctr_q, buf, SHAKE128_RATE);
+  }
+
+  unsigned int ctr_t = rej_uniform_t(a[i].vec[j].t_poly.coeffs, LORE_N, buf, BUF_SIZE);
+  while(ctr_t < LORE_N) {
+    xof_squeezeblocks(buf, 1, &state);
+    ctr_t += rej_uniform_t(a[i].vec[j].t_poly.coeffs + ctr_t, LORE_N - ctr_t, buf, SHAKE128_RATE);
+  }
+}
+
 
 /*************************************************
 * Name:        gen_matrix_ntt
@@ -223,47 +259,55 @@ void gen_matrix_std(poly_crt_vec a[LORE_K], const unsigned char *seed)
 void gen_matrix_ntt(poly_crt_vec a[LORE_K], const unsigned char *seed, int transposed)
 {
   unsigned int i, j;
-  
+
+#ifdef LORE_USE_AVX2_SHAKE
   // NBLOCKS *must* be large enough to generate q_poly and t_poly in one go
   // with overwhelming probability.
-  // q needs ~514 bytes, t needs ~266. Total ~780 bytes.
-  // SHAKE128_RATE = 168. 780/168 = 4.6. We'll use 5 blocks as a safe bet.
   const unsigned int NBLOCKS = 5;
-  uint8_t buf[NBLOCKS * SHAKE128_RATE];
-  
+  const size_t BUF_SIZE = NBLOCKS * SHAKE128_RATE;
+  const unsigned int total = LORE_K * LORE_K;
+
+  for (unsigned int base = 0; base < total; base += 4) {
+    uint8_t extseed[4][LORE_SYMBYTES + 2];
+    uint8_t buf4[4][5 * SHAKE128_RATE];
+    unsigned int row[4];
+    unsigned int col[4];
+
+    for (unsigned int lane = 0; lane < 4; lane++) {
+      unsigned int idx = base + lane;
+      if (idx >= total) {
+        idx = total - 1;
+      }
+
+      row[lane] = idx / LORE_K;
+      col[lane] = idx % LORE_K;
+      memcpy(extseed[lane], seed, LORE_SYMBYTES);
+      extseed[lane][LORE_SYMBYTES] = transposed ? (uint8_t)col[lane] : (uint8_t)row[lane];
+      extseed[lane][LORE_SYMBYTES + 1] = transposed ? (uint8_t)row[lane] : (uint8_t)col[lane];
+    }
+
+    lore_shake128x4_absorb_once_squeezeblocks(buf4[0], buf4[1], buf4[2], buf4[3],
+                                              NBLOCKS,
+                                              extseed[0], extseed[1], extseed[2], extseed[3],
+                                              sizeof(extseed[0]));
+
+    for (unsigned int lane = 0; lane < 4 && base + lane < total; lane++) {
+      unsigned int ctr_q = rej_uniform_q(a[row[lane]].vec[col[lane]].q_poly.coeffs,
+                                         LORE_N, buf4[lane], BUF_SIZE);
+      unsigned int ctr_t = rej_uniform_t(a[row[lane]].vec[col[lane]].t_poly.coeffs,
+                                         LORE_N, buf4[lane], BUF_SIZE);
+
+      if (ctr_q < LORE_N || ctr_t < LORE_N) {
+        gen_matrix_entry_scalar(a, seed, transposed, row[lane], col[lane]);
+      }
+    }
+  }
+  return;
+#endif
+
   for (i = 0; i < LORE_K; i++) {
     for (j = 0; j < LORE_K; j++) {
-      keccak_state state;
-      // 1. Set SHAKE state independently for each polynomial
-      if (transposed) {
-          xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
-      } else {
-          xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j);
-      }
-      // 2. Squeeze enough bytes at once
-      xof_squeezeblocks(buf, NBLOCKS, &state);
-
-      // 3. Generate q-part and t-part from the same buffer stream
-      
-      // -- Generate q-part --
-      unsigned int ctr_q = 0;
-      // Note: We use the rej_uniform_q function here.
-      ctr_q = rej_uniform_q(a[i].vec[j].q_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
-      // In the rare case the buffer is not enough, squeeze another block
-      while(ctr_q < LORE_N) {
-        xof_squeezeblocks(buf, 1, &state);
-        ctr_q += rej_uniform_q(a[i].vec[j].q_poly.coeffs + ctr_q, LORE_N - ctr_q, buf, SHAKE128_RATE);
-      }
-
-      // -- Generate t-part --
-      unsigned int ctr_t = 0;
-      // Requires the rej_uniform_t function
-      ctr_t = rej_uniform_t(a[i].vec[j].t_poly.coeffs, LORE_N, buf, NBLOCKS * SHAKE128_RATE);
-      // In the rare case the buffer is not enough, squeeze another block
-      while(ctr_t < LORE_N) {
-        xof_squeezeblocks(buf, 1, &state);
-        ctr_t += rej_uniform_t(a[i].vec[j].t_poly.coeffs + ctr_t, LORE_N - ctr_t, buf, SHAKE128_RATE);
-      }
+      gen_matrix_entry_scalar(a, seed, transposed, i, j);
     }
   }
 }
