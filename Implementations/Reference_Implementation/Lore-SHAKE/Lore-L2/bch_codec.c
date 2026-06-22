@@ -9,6 +9,7 @@
 #define BCH_MAX_ECC_BITS (BCH_MAX_M * BCH_MAX_T)
 #define BCH_MAX_ROWS (2 * BCH_MAX_M * BCH_MAX_T)
 #define BCH_MAX_WORDS ((BCH_MAX_ECC_BITS + 63) / 64)
+#define BCH_MAX_ROW_WORDS ((BCH_MAX_ROWS + 63) / 64)
 
 static unsigned int default_primitive_polynomial(unsigned int m)
 {
@@ -30,15 +31,6 @@ static unsigned int get_bit(const uint8_t *buf, unsigned int bit)
 static void toggle_bit(uint8_t *buf, unsigned int bit)
 {
     buf[bit >> 3] ^= (uint8_t)(1U << (bit & 7));
-}
-
-static void set_bit(uint8_t *buf, unsigned int bit, unsigned int value)
-{
-    if (value) {
-        buf[bit >> 3] |= (uint8_t)(1U << (bit & 7));
-    } else {
-        buf[bit >> 3] &= (uint8_t)~(1U << (bit & 7));
-    }
 }
 
 static unsigned int bit_word(unsigned int bit)
@@ -66,6 +58,15 @@ static void row_xor(uint64_t *dst, const uint64_t *src, unsigned int words)
     for (unsigned int i = 0; i < words; i++) {
         dst[i] ^= src[i];
     }
+}
+
+static unsigned int word_parity(uint64_t x)
+{
+    x ^= x >> 32;
+    x ^= x >> 16;
+    x ^= x >> 8;
+    x ^= x >> 4;
+    return (0x6996U >> (x & 0xfU)) & 1U;
 }
 
 static uint16_t gf_mul(const struct bch_control *bch, uint16_t a, uint16_t b)
@@ -157,6 +158,135 @@ static int build_parity_matrix(struct bch_control *bch)
     return 0;
 }
 
+static int build_parity_solver(const struct bch_control *bch,
+                               uint64_t solver[BCH_MAX_ECC_BITS][BCH_MAX_ROW_WORDS],
+                               unsigned int row_words)
+{
+    uint64_t matrix[BCH_MAX_ROWS][BCH_MAX_WORDS];
+    uint64_t transform[BCH_MAX_ROWS][BCH_MAX_ROW_WORDS];
+    int pivot_for_col[BCH_MAX_ECC_BITS];
+    unsigned int rank = 0;
+
+    memset(matrix, 0, sizeof(matrix));
+    memset(transform, 0, sizeof(transform));
+    memset(solver, 0, sizeof(uint64_t) * BCH_MAX_ECC_BITS * BCH_MAX_ROW_WORDS);
+    for (unsigned int i = 0; i < bch->ecc_bits; i++) {
+        pivot_for_col[i] = -1;
+    }
+
+    for (unsigned int row = 0; row < bch->rows; row++) {
+        memcpy(matrix[row],
+               &bch->parity_matrix[(size_t)row * bch->words],
+               (size_t)bch->words * sizeof(uint64_t));
+        matrix_set(transform[row], row);
+    }
+
+    for (unsigned int col = 0; col < bch->ecc_bits && rank < bch->rows; col++) {
+        unsigned int pivot = rank;
+
+        while (pivot < bch->rows && !matrix_bit(matrix[pivot], col)) {
+            pivot++;
+        }
+        if (pivot == bch->rows) {
+            continue;
+        }
+
+        if (pivot != rank) {
+            uint64_t tmp_row[BCH_MAX_WORDS];
+            uint64_t tmp_transform[BCH_MAX_ROW_WORDS];
+
+            memcpy(tmp_row, matrix[pivot], sizeof(tmp_row));
+            memcpy(matrix[pivot], matrix[rank], sizeof(tmp_row));
+            memcpy(matrix[rank], tmp_row, sizeof(tmp_row));
+            memcpy(tmp_transform, transform[pivot], sizeof(tmp_transform));
+            memcpy(transform[pivot], transform[rank], sizeof(tmp_transform));
+            memcpy(transform[rank], tmp_transform, sizeof(tmp_transform));
+        }
+
+        for (unsigned int row = 0; row < bch->rows; row++) {
+            if (row != rank && matrix_bit(matrix[row], col)) {
+                row_xor(matrix[row], matrix[rank], bch->words);
+                row_xor(transform[row], transform[rank], row_words);
+            }
+        }
+
+        pivot_for_col[col] = (int)rank;
+        rank++;
+    }
+
+    for (unsigned int col = 0; col < bch->ecc_bits; col++) {
+        if (pivot_for_col[col] >= 0) {
+            memcpy(solver[col], transform[pivot_for_col[col]],
+                   (size_t)row_words * sizeof(uint64_t));
+        }
+    }
+
+    return 0;
+}
+
+static void build_message_rhs(const struct bch_control *bch,
+                              unsigned int pos,
+                              uint64_t rhs[BCH_MAX_ROW_WORDS])
+{
+    memset(rhs, 0, sizeof(uint64_t) * BCH_MAX_ROW_WORDS);
+
+    for (unsigned int root = 1; root <= 2 * bch->t; root++) {
+        uint16_t value = gf_pow_alpha(bch, root * pos);
+
+        for (unsigned int bit = 0; bit < bch->m; bit++) {
+            if ((value >> bit) & 1U) {
+                unsigned int row = (root - 1) * bch->m + bit;
+                matrix_set(rhs, row);
+            }
+        }
+    }
+}
+
+static void solve_rhs_to_words(const struct bch_control *bch,
+                               uint64_t solver[BCH_MAX_ECC_BITS][BCH_MAX_ROW_WORDS],
+                               unsigned int row_words,
+                               const uint64_t rhs[BCH_MAX_ROW_WORDS],
+                               uint64_t *ecc_words)
+{
+    memset(ecc_words, 0, (size_t)bch->words * sizeof(uint64_t));
+
+    for (unsigned int col = 0; col < bch->ecc_bits; col++) {
+        unsigned int value = 0;
+
+        for (unsigned int word = 0; word < row_words; word++) {
+            value ^= word_parity(solver[col][word] & rhs[word]);
+        }
+        if (value & 1U) {
+            matrix_set(ecc_words, col);
+        }
+    }
+}
+
+static int build_encode_matrix(struct bch_control *bch)
+{
+    uint64_t solver[BCH_MAX_ECC_BITS][BCH_MAX_ROW_WORDS];
+    uint64_t rhs[BCH_MAX_ROW_WORDS];
+    unsigned int row_words = (bch->rows + 63U) / 64U;
+
+    bch->encode_matrix = (uint64_t *)calloc((size_t)bch->msg_bits * bch->words,
+                                            sizeof(uint64_t));
+    if (bch->encode_matrix == NULL) {
+        return -1;
+    }
+
+    if (build_parity_solver(bch, solver, row_words) != 0) {
+        return -1;
+    }
+
+    for (unsigned int pos = 0; pos < bch->msg_bits; pos++) {
+        build_message_rhs(bch, pos, rhs);
+        solve_rhs_to_words(bch, solver, row_words, rhs,
+                           &bch->encode_matrix[(size_t)pos * bch->words]);
+    }
+
+    return 0;
+}
+
 struct bch_control *init_bch(int m, int t, unsigned int prim_poly)
 {
     struct bch_control *bch;
@@ -189,7 +319,7 @@ struct bch_control *init_bch(int m, int t, unsigned int prim_poly)
         prim_poly = default_primitive_polynomial(bch->m);
     }
     if (prim_poly == 0 || build_field(bch, prim_poly) != 0 ||
-        build_parity_matrix(bch) != 0) {
+        build_parity_matrix(bch) != 0 || build_encode_matrix(bch) != 0) {
         free_bch(bch);
         return NULL;
     }
@@ -206,6 +336,7 @@ void free_bch(struct bch_control *bch)
     free(bch->alpha_to);
     free(bch->index_of);
     free(bch->parity_matrix);
+    free(bch->encode_matrix);
     free(bch);
 }
 
@@ -214,91 +345,27 @@ static int solve_parity(const struct bch_control *bch,
                         unsigned int data_bits,
                         uint8_t *ecc)
 {
-    uint16_t syndrome[2 * BCH_MAX_T + 1] = {0};
-    uint64_t matrix[BCH_MAX_ROWS][BCH_MAX_WORDS];
-    uint8_t rhs[BCH_MAX_ROWS];
-    int pivot_for_col[BCH_MAX_ECC_BITS];
-    unsigned int rank = 0;
+    uint64_t ecc_words[BCH_MAX_WORDS] = {0};
 
-    if (data_bits != bch->msg_bits) {
+    if (data_bits != bch->msg_bits || bch->encode_matrix == NULL) {
         return -1;
     }
 
     memset(ecc, 0, bch->ecc_bytes);
-    memset(matrix, 0, sizeof(matrix));
-    memset(rhs, 0, sizeof(rhs));
-    for (unsigned int i = 0; i < bch->ecc_bits; i++) {
-        pivot_for_col[i] = -1;
-    }
 
     for (unsigned int pos = 0; pos < data_bits; pos++) {
         if (get_bit(data, pos)) {
-            for (unsigned int root = 1; root <= 2 * bch->t; root++) {
-                syndrome[root] ^= gf_pow_alpha(bch, root * pos);
-            }
+            row_xor(ecc_words,
+                    &bch->encode_matrix[(size_t)pos * bch->words],
+                    bch->words);
         }
     }
 
-    for (unsigned int row = 0; row < bch->rows; row++) {
-        memcpy(matrix[row],
-               &bch->parity_matrix[(size_t)row * bch->words],
-               (size_t)bch->words * sizeof(uint64_t));
+    for (unsigned int byte = 0; byte < bch->ecc_bytes; byte++) {
+        ecc[byte] = (uint8_t)(ecc_words[byte >> 3] >> (8 * (byte & 7)));
     }
-
-    for (unsigned int root = 1; root <= 2 * bch->t; root++) {
-        for (unsigned int bit = 0; bit < bch->m; bit++) {
-            unsigned int row = (root - 1) * bch->m + bit;
-            rhs[row] = (uint8_t)((syndrome[root] >> bit) & 1U);
-        }
-    }
-
-    for (unsigned int col = 0; col < bch->ecc_bits && rank < bch->rows; col++) {
-        unsigned int pivot = rank;
-
-        while (pivot < bch->rows && !matrix_bit(matrix[pivot], col)) {
-            pivot++;
-        }
-        if (pivot == bch->rows) {
-            continue;
-        }
-
-        if (pivot != rank) {
-            uint64_t tmp_row[BCH_MAX_WORDS];
-            uint8_t tmp_rhs = rhs[pivot];
-
-            memcpy(tmp_row, matrix[pivot], sizeof(tmp_row));
-            memcpy(matrix[pivot], matrix[rank], sizeof(tmp_row));
-            memcpy(matrix[rank], tmp_row, sizeof(tmp_row));
-            rhs[pivot] = rhs[rank];
-            rhs[rank] = tmp_rhs;
-        }
-
-        for (unsigned int row = 0; row < bch->rows; row++) {
-            if (row != rank && matrix_bit(matrix[row], col)) {
-                row_xor(matrix[row], matrix[rank], bch->words);
-                rhs[row] ^= rhs[rank];
-            }
-        }
-
-        pivot_for_col[col] = (int)rank;
-        rank++;
-    }
-
-    for (unsigned int row = rank; row < bch->rows; row++) {
-        unsigned int nonzero = 0;
-
-        for (unsigned int word = 0; word < bch->words; word++) {
-            nonzero |= matrix[row][word] != 0;
-        }
-        if (!nonzero && rhs[row]) {
-            return -1;
-        }
-    }
-
-    for (unsigned int col = 0; col < bch->ecc_bits; col++) {
-        if (pivot_for_col[col] >= 0) {
-            set_bit(ecc, col, rhs[pivot_for_col[col]]);
-        }
+    if ((bch->ecc_bits & 7U) != 0) {
+        ecc[bch->ecc_bytes - 1] &= (uint8_t)((1U << (bch->ecc_bits & 7U)) - 1U);
     }
 
     return 0;

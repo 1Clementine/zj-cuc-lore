@@ -19,6 +19,7 @@ struct bch_control {
     uint16_t *alpha_to;
     int16_t *index_of;
     uint64_t *parity_matrix;
+    uint64_t *encode_matrix;
 };
 
 struct bch_control *init_bch(int m, int t, unsigned int prim_poly);
