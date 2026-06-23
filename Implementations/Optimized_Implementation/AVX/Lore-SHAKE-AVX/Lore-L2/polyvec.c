@@ -1,5 +1,6 @@
 #include "polyvec.h"
 #include "poly.h"
+#include "reduce.h"
 #include "symmetric.h"
 #include <string.h> // for memset
 
