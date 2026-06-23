@@ -352,6 +352,7 @@ void poly_getnoise_uniform(poly *r, uint16_t t, const unsigned char *seed, unsig
 {
     uint8_t buf[LORE_N * 2];
     prf(buf, sizeof(buf), seed, nonce);
+    memset(r->coeffs, 0, LORE_N * sizeof(int16_t)); /* ensure fully initialized on early exit */
 
     int ctr = 0; 
     unsigned int buf_pos = 0; 

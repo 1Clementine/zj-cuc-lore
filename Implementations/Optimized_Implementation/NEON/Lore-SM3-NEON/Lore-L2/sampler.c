@@ -3,6 +3,7 @@
 #include "symmetric.h"
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /*************************************************
 * Name:        sample_fixed_weight 
@@ -55,7 +56,13 @@ void sample_fixed_weight(poly_crt_vec *r_crt_vec, poly_sparse *r_sparse_vec, con
             
             // Rejection sampling loop for unbiased index selection.
             do {
-                if (buf_pos + 2 > BUF_SIZE) return; // Security check
+                if (buf_pos + 2 > BUF_SIZE) {
+                    /* PRF buffer exhausted: this should never happen with the
+                     * current BUF_SIZE, but a silent return would produce a
+                     * polynomial with incorrect Hamming weight, which is
+                     * cryptographically dangerous. Abort loudly instead. */
+                    abort();
+                }
                 rand_val = (uint16_t)(buf[buf_pos] | ((uint16_t)buf[buf_pos + 1] << 8));
                 buf_pos += 2;
                 m = (uint32_t)rand_val * current_len;

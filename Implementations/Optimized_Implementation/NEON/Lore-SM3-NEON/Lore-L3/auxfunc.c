@@ -241,6 +241,7 @@ static int pseudohash_512(const unsigned char *msg, unsigned long long msg_len_b
 	if (hmac(cascade_0200_msg, 16 + msg_len_bits, key, key_len_bits, k1) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0200_msg);
 		return HASH_FAILED;
 	}
 	// h1
@@ -250,6 +251,7 @@ static int pseudohash_512(const unsigned char *msg, unsigned long long msg_len_b
 	if (cascade_msg_0200 == NULL)
 	{
 		fprintf(stderr, "ERROR: Memory allocation failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0200_msg);
 		return MEMORY_ALLOCATION_FAILED;
 	}
 	memcpy(cascade_msg_0200, msg, (msg_len_bits + 7) / 8);
@@ -298,6 +300,7 @@ static int pseudohash_768(const unsigned char *msg, unsigned long long msg_len_b
 	if (hmac(cascade_0300_msg, 16 + msg_len_bits, key, key_len_bits, k1) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0300_msg);
 		return HASH_FAILED;
 	}
 	// h1
@@ -307,6 +310,7 @@ static int pseudohash_768(const unsigned char *msg, unsigned long long msg_len_b
 	if (cascade_msg_0300 == NULL)
 	{
 		fprintf(stderr, "ERROR: Memory allocation failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0300_msg);
 		return MEMORY_ALLOCATION_FAILED;
 	}
 	memcpy(cascade_msg_0300, msg, (msg_len_bits + 7) / 8);
@@ -329,6 +333,8 @@ static int pseudohash_768(const unsigned char *msg, unsigned long long msg_len_b
 	if (hmac(h1, (sizeof(h1) / sizeof(h1[0])) * 8, key, key_len_bits, k2) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0300_msg);
+		free(cascade_msg_0300);
 		return HASH_FAILED;
 	}
 	// h2
@@ -370,6 +376,7 @@ static int pseudohash_1024(const unsigned char *msg, unsigned long long msg_len_
 	if (hmac(cascade_0400_msg, 16 + msg_len_bits, key, key_len_bits, k1) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0400_msg);
 		return HASH_FAILED;
 	}
 	// h1
@@ -379,6 +386,7 @@ static int pseudohash_1024(const unsigned char *msg, unsigned long long msg_len_
 	if (cascade_msg_0400 == NULL)
 	{
 		fprintf(stderr, "ERROR: Memory allocation failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0400_msg);
 		return MEMORY_ALLOCATION_FAILED;
 	}
 	memcpy(cascade_msg_0400, msg, (msg_len_bits + 7) / 8);
@@ -400,6 +408,8 @@ static int pseudohash_1024(const unsigned char *msg, unsigned long long msg_len_
 	if (hmac(h1, (sizeof(h1) / sizeof(h1[0])) * 8, key, key_len_bits, k2) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0400_msg);
+		free(cascade_msg_0400);
 		return HASH_FAILED;
 	}
 	// h2
@@ -413,6 +423,8 @@ static int pseudohash_1024(const unsigned char *msg, unsigned long long msg_len_
 	if (hmac(h2, (sizeof(h2) / sizeof(h2[0])) * 8, key, key_len_bits, k3) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0400_msg);
+		free(cascade_msg_0400);
 		return HASH_FAILED;
 	}
 	// h3
@@ -426,6 +438,8 @@ static int pseudohash_1024(const unsigned char *msg, unsigned long long msg_len_
 	if (hmac(h3, (sizeof(h3) / sizeof(h3[0])) * 8, key, key_len_bits, k4) != 0)
 	{
 		fprintf(stderr, "ERROR: HMAC failed at %s, line %d. \n", __FILE__, __LINE__);
+		free(cascade_0400_msg);
+		free(cascade_msg_0400);
 		return HASH_FAILED;
 	}
 	// h4

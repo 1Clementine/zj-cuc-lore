@@ -18,6 +18,16 @@
 * - const uint8_t *in: pointer to input buffer
 * - size_t inlen:      length of input buffer in bytes
 **************************************************/
+/*
+ * secure_zero: volatile-based zeroing that cannot be eliminated by the compiler.
+ * Used to wipe sensitive key material from the stack before returning.
+ */
+static void secure_zero(void *ptr, size_t len)
+{
+    volatile unsigned char *p = (volatile unsigned char *)ptr;
+    while (len--) *p++ = 0;
+}
+
 static void hash_h(uint8_t *out, const uint8_t *in, size_t inlen) {
     sm3(out, in, inlen);
 }
@@ -82,6 +92,7 @@ int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
     unsigned char coins[2 * LORE_SYMBYTES];
     randombytes(coins, 2 * LORE_SYMBYTES);
     crypto_kem_keypair_derand(pk, sk, coins);
+    secure_zero(coins, sizeof(coins));
     return 0;
 }
 
@@ -126,7 +137,9 @@ int crypto_kem_enc_derand(unsigned char *ct, unsigned char *ss, const unsigned c
 
     sm3_kdf(ss, LORE_SYMBYTES, kdf_buf, 2 * LORE_SYMBYTES);
 
-
+    secure_zero(kr, sizeof(kr));
+    secure_zero(buf, sizeof(buf));
+    secure_zero(kdf_buf, sizeof(kdf_buf));
     return 0;
 }
 
@@ -150,6 +163,7 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     unsigned char coins[LORE_MSG_BYTES];
     randombytes(coins, LORE_MSG_BYTES);
     crypto_kem_enc_derand(ct, ss, pk, coins);
+    secure_zero(coins, sizeof(coins));
     return 0;
 }
 
@@ -217,10 +231,14 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
 
 
 
-    cmov(ss, ss_valid, LORE_SYMBYTES, (unsigned char)(1 - fail));
-    cmov(ss, ss_invalid, LORE_SYMBYTES, (unsigned char)fail);
+    memcpy(ss, ss_invalid, LORE_SYMBYTES);            /* 默认：隐式拒绝 */
+    cmov(ss, ss_valid, LORE_SYMBYTES, (unsigned char)(fail ^ 1)); /* 成功时覆盖 */
 
-    for(size_t i = 0; i < LORE_MSG_BYTES; i++) mu[i] = 0;
-    for(size_t i = 0; i < 2 * LORE_SYMBYTES; i++) kr[i] = 0;
+    secure_zero(mu, sizeof(mu));
+    secure_zero(kr, sizeof(kr));
+    secure_zero(buf, sizeof(buf));
+    secure_zero(kdf_buf, sizeof(kdf_buf));
+    secure_zero(ss_valid, sizeof(ss_valid));
+    secure_zero(ss_invalid, sizeof(ss_invalid));
     return 0;
 }

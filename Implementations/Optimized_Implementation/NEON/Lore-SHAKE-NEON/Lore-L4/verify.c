@@ -2,6 +2,17 @@
 #include <stdint.h>
 #include "verify.h"
 
+/*
+ * The constant-time comparison and conditional-move primitives in this
+ * file (verify, cmov, cmov_int16) are independently implemented for
+ * Lore, following the same well-known design patterns used in
+ * post-quantum KEM constructions (e.g., ML-KEM / CRYSTALS-Kyber).
+ * The inline assembly barrier
+ *     __asm__("" : "+r"(b) : );
+ * is a standard GCC/Clang technique to prevent Dead Store Elimination
+ * of the condition byte, and is not original to any single project.
+ */
+
 /*************************************************
 * Name:        verify
 *
