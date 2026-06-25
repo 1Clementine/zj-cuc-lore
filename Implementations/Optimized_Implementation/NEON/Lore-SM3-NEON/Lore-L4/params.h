@@ -11,7 +11,7 @@
 #endif
 
 /* Namespace-prefix for all public functions */
-#define LORE_NAMESPACE(s) lore_ref_##s
+#define LORE_NAMESPACE(s) lore_neon_##s
 
 /* Common parameters */
 #define LORE_Q 257

@@ -82,7 +82,7 @@ TEST_BINS  := test_lore_1 test_lore_2
 SPEED_BINS := test_speed_1 test_speed_2
 KAT_BINS   := KAT_KEM_1 KAT_KEM_2
 
-all: test speed kat_api
+all: kat_api
 
 test: $(TEST_BINS)
 

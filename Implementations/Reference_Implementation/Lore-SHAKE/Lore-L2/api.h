@@ -8,6 +8,10 @@
 #define CRYPTO_ALGNAME "LORE-128"
 #elif (LORE_LEVEL == 2)
 #define CRYPTO_ALGNAME "LORE-256"
+#elif (LORE_LEVEL == 3)
+#define CRYPTO_ALGNAME "LORE-384"
+#elif (LORE_LEVEL == 4)
+#define CRYPTO_ALGNAME "LORE-512"
 #endif
 
 // === KEM API ===
@@ -16,7 +20,7 @@
 #define CRYPTO_CIPHERTEXTBYTES LORE_CIPHERTEXTBYTES
 #define CRYPTO_BYTES           LORE_BYTES
 #define CRYPTO_KEYPAIRCOINBYTES (2 * LORE_SYMBYTES) // For derand keypair
-#define CRYPTO_ENCCOINBYTES    LORE_SYMBYTES      // For derand encaps
+#define CRYPTO_ENCCOINBYTES    LORE_MSG_BYTES      // For derand encaps
 
 int crypto_kem_keypair_derand(unsigned char *pk, unsigned char *sk, const unsigned char *coins);
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk);

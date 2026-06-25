@@ -102,20 +102,20 @@ static void toom_cook_4way(const int16_t *a1, const int16_t *b1, int16_t *result
         r0 = A0[j]; r1 = A1[j]; r2 = A2[j]; r3 = A3[j];
         r4 = r0 + r2; r5 = r1 + r3; r6 = r4 + r5; r7 = r4 - r5;
         aw3[j] = r6; aw4[j] = r7;
-        r4 = (int16_t)(((r0 << 2) + r2) << 1); r5 = (int16_t)((r1 << 2) + r3);
+        r4 = (int16_t)(((int32_t)r0 * 4 + r2) * 2); r5 = (int16_t)((int32_t)r1 * 4 + r3);
         r6 = r4 + r5; r7 = r4 - r5;
         aw5[j] = r6; aw6[j] = r7;
-        r4 = (int16_t)((r3 << 3) + (r2 << 2) + (r1 << 1) + r0);
+        r4 = (int16_t)((int32_t)r3 * 8 + (int32_t)r2 * 4 + (int32_t)r1 * 2 + r0);
         aw2[j] = r4; aw7[j] = r0; aw1[j] = r3;
     }
     for (j = 0; j < N_SB; ++j) {
         r0 = B0[j]; r1 = B1[j]; r2 = B2[j]; r3 = B3[j];
         r4 = r0 + r2; r5 = r1 + r3; r6 = r4 + r5; r7 = r4 - r5;
         bw3[j] = r6; bw4[j] = r7;
-        r4 = (int16_t)(((r0 << 2) + r2) << 1); r5 = (int16_t)((r1 << 2) + r3);
+        r4 = (int16_t)(((int32_t)r0 * 4 + r2) * 2); r5 = (int16_t)((int32_t)r1 * 4 + r3);
         r6 = r4 + r5; r7 = r4 - r5;
         bw5[j] = r6; bw6[j] = r7;
-       r4 = (int16_t)((r3 << 3) + (r2 << 2) + (r1 << 1) + r0);
+       r4 = (int16_t)((int32_t)r3 * 8 + (int32_t)r2 * 4 + (int32_t)r1 * 2 + r0);
         bw2[j] = r4; bw7[j] = r0; bw1[j] = r3;
     }
     
@@ -128,11 +128,11 @@ static void toom_cook_4way(const int16_t *a1, const int16_t *b1, int16_t *result
         r0 = w1[i]; r1 = w2[i]; r2 = w3[i]; r3 = w4[i];
         r4 = w5[i]; r5 = w6[i]; r6 = w7[i];
         r1 += r4; r5 -= r4; r3 = (int16_t)((r3 - r2) >> 1);
-        r4 -= r0; r4 -= (int16_t)(r6 << 6); r4 = (int16_t)((r4 << 1) + r5);
-        r2 += r3; r1 -= (int16_t)((r2 << 6) + r2);
+        r4 -= r0; r4 -= (int16_t)((int32_t)r6 * 64); r4 = (int16_t)((int32_t)r4 * 2 + r5);
+        r2 += r3; r1 -= (int16_t)((int32_t)r2 * 64 + r2);
         r2 -= r6; r2 -= r0; r1 += (int16_t)(45 * r2);
-        r4 = (int16_t)(((int64_t)(r4 - (r2 << 3)) * inv3) >> 3);
-        r5 += r1; r1 = (int16_t)(((int64_t)(r1 + (r3 << 4)) * inv9) >> 1);
+        r4 = (int16_t)(((int64_t)(r4 - (int32_t)r2 * 8) * inv3) >> 3);
+        r5 += r1; r1 = (int16_t)(((int64_t)(r1 + (int32_t)r3 * 16) * inv9) >> 1);
         r3 = (int16_t)(-(r3 + r1)); r5 = (int16_t)(((int64_t)(30 * r1 - r5) * inv15) >> 2);
         r2 -= r4; r1 -= r5;
         // Accumulate results with N_SB offsets.

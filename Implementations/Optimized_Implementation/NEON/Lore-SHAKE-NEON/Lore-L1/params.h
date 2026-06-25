@@ -11,7 +11,7 @@
 #endif
 
 /* Namespace-prefix for all public functions */
-#define LORE_NAMESPACE(s) lore_ref_##s
+#define LORE_NAMESPACE(s) lore_neon_##s
 
 /* Common parameters */
 #define LORE_Q 257
@@ -42,8 +42,34 @@
     #define LORE_HWT_M1 70
     #define LORE_HWT_P2 6
     #define LORE_HWT_M2 6
+#elif LORE_LEVEL == 3
+    #define LORE_N 512
+    #define LORE_KAPPA 384
+    #define LORE_BCH_M 9
+    #define LORE_BCH_T 14
+    #define LORE_K 3
+    #define LORE_T 4
+    #define LORE_L 1
+    #define LORE_R_BITS 1
+    #define LORE_HWT_P1 90
+    #define LORE_HWT_M1 90
+    #define LORE_HWT_P2 20
+    #define LORE_HWT_M2 20
+#elif LORE_LEVEL == 4
+    #define LORE_N 768
+    #define LORE_KAPPA 512
+    #define LORE_BCH_M 10
+    #define LORE_BCH_T 25
+    #define LORE_K 3
+    #define LORE_T 4
+    #define LORE_L 1
+    #define LORE_R_BITS 1
+    #define LORE_HWT_P1 140
+    #define LORE_HWT_M1 140
+    #define LORE_HWT_P2 20
+    #define LORE_HWT_M2 20
 #else
-    #error "LORE_LEVEL must be defined as 1 or 2"
+    #error "LORE_LEVEL must be defined as 1, 2, 3, or 4"
 #endif
 
 #define LORE_MSG_BYTES (LORE_KAPPA / 8)
@@ -105,6 +131,10 @@
     #define LORE_INSTANCE_NAME "Lore-L1"
 #elif LORE_LEVEL == 2
     #define LORE_INSTANCE_NAME "Lore-L2"
+#elif LORE_LEVEL == 3
+    #define LORE_INSTANCE_NAME "Lore-L3"
+#elif LORE_LEVEL == 4
+    #define LORE_INSTANCE_NAME "Lore-L4"
 #endif
 
 #endif

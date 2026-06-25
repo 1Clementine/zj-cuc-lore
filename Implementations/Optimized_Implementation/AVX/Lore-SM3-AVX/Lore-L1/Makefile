@@ -123,7 +123,7 @@ TEST_BINS  := test_lore_1 test_lore_2 test_lore_3 test_lore_4
 SPEED_BINS := test_speed_1 test_speed_2 test_speed_3 test_speed_4
 KAT_BINS   := KAT_KEM_1 KAT_KEM_2 KAT_KEM_3 KAT_KEM_4
 
-all: test speed kat_api
+all: kat_api
 
 test: $(TEST_BINS)
 
